@@ -45,6 +45,7 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Deviations from the plan
 
+- Eye shine highlights move with the iris. The plan (Owl artwork table) said they stay fixed relative to the eye, but the user found a static highlight over a moving pupil looked wrong.
 - The owl lives in a second package target, `GazelingCharacters` (SwiftUI), not in `App/Characters/`. Reason: it can be rendered and tested from the command line (`make pose-sheet`), and `GazelingKit` stays Foundation-only. The app will link it through `project.yml`.
 - `.swift-format` sets 4-space indentation (the default is 2); the whole codebase was reformatted once.
 

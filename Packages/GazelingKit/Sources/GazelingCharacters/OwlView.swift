@@ -151,9 +151,12 @@ struct OwlEye: View {
                 .offset(x: gaze.width, y: gaze.height)
             Circle().fill(palette.pupil).frame(width: 14, height: 14)
                 .offset(x: gaze.width, y: gaze.height)
-            // Shine stays fixed to the eye, not the pupil, so the eye looks alive.
-            Circle().fill(.white).frame(width: 8, height: 8).offset(x: -8, y: -9)
-            Circle().fill(.white.opacity(0.9)).frame(width: 4, height: 4).offset(x: 7, y: 7)
+            // The shine moves with the iris. (A highlight fixed to the eye while the pupil slides away
+            // from it looks wrong in a cartoon.)
+            Circle().fill(.white).frame(width: 7, height: 7)
+                .offset(x: gaze.width - 5, y: gaze.height - 6)
+            Circle().fill(.white.opacity(0.9)).frame(width: 3.5, height: 3.5)
+                .offset(x: gaze.width + 4, y: gaze.height + 4)
             upperLid
             lowerLid
         }
