@@ -156,3 +156,32 @@ private final class Harness {
     await h.advance(Int(first) + 1)
     #expect(session.stepIndex == 1)
 }
+
+@Test @MainActor func sessionExposesWhenTheCurrentStepStarted() async {
+    let h = Harness()
+    h.app.startBreakNow(.long)
+    let session = h.app.session!
+    #expect(session.stepStartedAt == session.startedAt)
+    let first = session.plan.steps[0].seconds
+    await h.advance(Int(first) + 1)
+    #expect(session.stepStartedAt == session.startedAt.addingTimeInterval(first))
+}
+
+@Test @MainActor func playNowShowsThatExerciseForItsOwnLength() async throws {
+    let h = Harness()
+    let palming = try #require(h.app.exercises.first { $0.id == "palming" })
+    h.app.playNow(exercise: palming)
+    #expect(h.fakes.events == ["show", "startSound"])
+    #expect(h.app.session?.plan.steps.map(\.exercise.id) == ["palming"])
+    #expect(h.app.session?.totalSeconds == 30)
+    await h.advance(29)
+    #expect(h.app.state != .working)
+    await h.advance(1)
+    #expect(h.app.state == .working)
+}
+
+@Test @MainActor func playNowCanBeShortened() async throws {
+    let h = Harness()
+    h.app.playNow(exercise: h.app.exercises[0], seconds: 4)
+    #expect(h.app.session?.totalSeconds == 4)
+}

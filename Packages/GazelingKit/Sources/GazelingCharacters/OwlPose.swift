@@ -19,7 +19,31 @@ public struct OwlPose: Equatable, Sendable {
     /// 0 wings at the sides, 1 both wings cupped over the eyes.
     public var wingCover = 0.0
 
+    /// Whole-figure lift in points (walking bounce).
+    public var bounce = 0.0
+    /// How far each foot is lifted, in points.
+    public var leftFoot = 0.0
+    public var rightFoot = 0.0
+    /// 0 to 1, the chest swelling slightly as the owl breathes.
+    public var breathe = 0.0
+
     public init() {}
+
+    private static var fields: [WritableKeyPath<OwlPose, Double>] {
+        [
+            \.gazeX, \.gazeY, \.eyelid, \.smile, \.brow, \.headTilt, \.leftWing, \.rightWing, \.wingCover,
+            \.bounce, \.leftFoot, \.rightFoot, \.breathe,
+        ]
+    }
+
+    /// Moves from this pose toward `other`: 0 gives this pose, 1 gives `other`.
+    public func blended(with other: OwlPose, _ amount: Double) -> OwlPose {
+        var result = self
+        for field in Self.fields {
+            result[keyPath: field] = self[keyPath: field] + (other[keyPath: field] - self[keyPath: field]) * amount
+        }
+        return result
+    }
 
     public static let neutral = OwlPose()
 

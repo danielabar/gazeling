@@ -19,6 +19,9 @@ public final class AppState {
     @ObservationIgnored private let sound: SoundPlayer
     @ObservationIgnored private let clock: () -> Date
     @ObservationIgnored private var tickTask: Task<Void, Never>?
+    @ObservationIgnored private var forcedPlan: BreakPlan?
+    /// Every exercise in the catalog, for the debug menu.
+    public let exercises: [Exercise]
 
     /// `settings` overrides the stored settings without saving them (debug launch arguments).
     public init(
@@ -36,6 +39,7 @@ public final class AppState {
         self.overlay = overlay
         self.sound = sound
         self.clock = clock
+        self.exercises = catalog.exercises
         self.scheduler = BreakScheduler(
             settings: settings, availableKinds: picker.availableKinds(settings: settings), now: clock())
     }
@@ -84,6 +88,14 @@ public final class AppState {
     /// Debug: start a break now.
     public func startBreakNow(_ kind: BreakKind) {
         perform { $0.startBreak(kind, now: clock()) }
+    }
+
+    /// Debug: play one exercise now, ignoring the schedule. Lasts `seconds`, or the exercise's own length.
+    public func playNow(exercise: Exercise, seconds: TimeInterval? = nil) {
+        let length = seconds ?? exercise.durationSeconds
+        forcedPlan = .short(exercise, seconds: length)
+        perform { $0.startBreak(.short, now: clock(), duration: length) }
+        forcedPlan = nil
     }
 
     public func apply(settings: Settings) {
@@ -135,7 +147,7 @@ public final class AppState {
     }
 
     private func startSession(kind: BreakKind, now: Date) {
-        guard let plan = picker.plan(for: kind, settings: settings) else {
+        guard let plan = forcedPlan ?? picker.plan(for: kind, settings: settings) else {
             perform { $0.skip(now: now) }
             return
         }

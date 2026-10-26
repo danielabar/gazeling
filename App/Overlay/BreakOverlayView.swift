@@ -20,8 +20,10 @@ struct BreakOverlayView: View {
             let owlHeight = min(
                 OwlSize.maxHeight, max(OwlSize.minHeight, proxy.size.height * OwlSize.screenHeightFraction))
             VStack(spacing: 24) {
-                OwlView(pose: .neutral)
-                    .frame(width: owlHeight * OwlView.canvas.width / OwlView.canvas.height, height: owlHeight)
+                AnimatedOwlView(
+                    script: session.step.exercise.animationScript, stepStart: session.stepStartedAt,
+                    stepDuration: session.step.seconds, breakEnd: session.endsAt, height: owlHeight
+                )
                 Text(LocalizedStringKey(session.step.exercise.titleKey))
                     .font(.system(size: 40, weight: .semibold))
                 Text(LocalizedStringKey(session.step.exercise.instructionKey))

@@ -29,6 +29,14 @@ struct MenuContent: View {
             Divider()
             Button("Debug: start short break") { appState.startBreakNow(.short) }
             Button("Debug: start long break") { appState.startBreakNow(.long) }
+            Menu("Debug: play exercise") {
+                ForEach(appState.exercises) { exercise in
+                    Button(LocalizedStringKey(exercise.titleKey)) { appState.playNow(exercise: exercise) }
+                }
+            }
+            Button("Debug: goodbye wave (4 s)") {
+                if let exercise = appState.exercises.first { appState.playNow(exercise: exercise, seconds: 4) }
+            }
         #endif
 
         Divider()

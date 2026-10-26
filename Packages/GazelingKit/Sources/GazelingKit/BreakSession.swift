@@ -33,6 +33,11 @@ public final class BreakSession {
 
     public var step: BreakPlan.Step { plan.steps[stepIndex] }
 
+    /// When the step in progress began.
+    public var stepStartedAt: Date {
+        startedAt.addingTimeInterval(plan.steps[..<stepIndex].map(\.seconds).reduce(0, +))
+    }
+
     public func update(now: Date) {
         self.now = now
     }

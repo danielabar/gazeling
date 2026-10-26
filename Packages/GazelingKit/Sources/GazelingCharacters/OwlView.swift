@@ -18,11 +18,12 @@ public struct OwlView: View {
             let scale = min(proxy.size.width / Self.canvas.width, proxy.size.height / Self.canvas.height)
             ZStack(alignment: .topLeading) {
                 feet
-                bodyShape
+                bodyShape.scaleEffect(1 + 0.03 * pose.breathe, anchor: UnitPoint(x: 0.5, y: 0.95))
                 head
                 wing(left: true)
                 wing(left: false)
             }
+            .offset(y: -pose.bounce)
             .frame(width: Self.canvas.width, height: Self.canvas.height, alignment: .topLeading)
             .scaleEffect(scale, anchor: .topLeading)
             .frame(width: Self.canvas.width * scale, height: Self.canvas.height * scale, alignment: .topLeading)
@@ -36,9 +37,8 @@ public struct OwlView: View {
 
     private var feet: some View {
         ZStack {
-            ForEach([78.0, 122.0], id: \.self) { x in
-                Ellipse().fill(palette.beak).frame(width: 30, height: 14).position(x: x, y: 230)
-            }
+            Ellipse().fill(palette.beak).frame(width: 30, height: 14).position(x: 78, y: 230 - pose.leftFoot)
+            Ellipse().fill(palette.beak).frame(width: 30, height: 14).position(x: 122, y: 230 - pose.rightFoot)
         }
     }
 
@@ -111,7 +111,8 @@ public struct OwlView: View {
         let raise = left ? pose.leftWing : pose.rightWing
         let outward = 7.0 + raise
         let cover = pose.wingCover
-        let angle = outward + (194.0 - outward) * cover
+        // Cover by swinging inward across the chest (-166 degrees), not outward past the side (194).
+        let angle = outward + (-166.0 - outward) * cover
         let sign = left ? 1.0 : -1.0
         let shoulderX = (left ? 52.0 : 148.0) + (left ? 3.0 : -3.0) * cover
         let shoulderY = 128.0 + 11.0 * cover
@@ -140,15 +141,15 @@ struct OwlEye: View {
     private let radius = 26.0
 
     var body: some View {
-        let reach = radius - 16.0
+        let reach = radius - 14.0
         // Keep the iris inside the eye at diagonals too.
         let length = max(1, (pose.gazeX * pose.gazeX + pose.gazeY * pose.gazeY).squareRoot())
         let gaze = CGSize(width: pose.gazeX / length * reach, height: pose.gazeY / length * reach)
         ZStack {
             Circle().fill(palette.eyeWhite)
-            Circle().fill(palette.iris).frame(width: 32, height: 32)
+            Circle().fill(palette.iris).frame(width: 28, height: 28)
                 .offset(x: gaze.width, y: gaze.height)
-            Circle().fill(palette.pupil).frame(width: 16, height: 16)
+            Circle().fill(palette.pupil).frame(width: 14, height: 14)
                 .offset(x: gaze.width, y: gaze.height)
             // Shine stays fixed to the eye, not the pupil, so the eye looks alive.
             Circle().fill(.white).frame(width: 8, height: 8).offset(x: -8, y: -9)

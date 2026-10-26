@@ -85,10 +85,10 @@ public struct BreakScheduler: Sendable {
     }
 
     /// Starts a break immediately (debug menu, launch arguments). Does nothing if paused or the kind is unavailable.
-    public mutating func startBreak(_ kind: BreakKind, now: Date) {
+    public mutating func startBreak(_ kind: BreakKind, now: Date, duration: TimeInterval? = nil) {
         guard availableKinds.contains(kind) else { return }
         if case .paused = state { return }
-        state = .onBreak(kind: kind, endsAt: now.addingTimeInterval(settings.breakDuration(for: kind)))
+        state = .onBreak(kind: kind, endsAt: now.addingTimeInterval(duration ?? settings.breakDuration(for: kind)))
     }
 
     /// Cancels the current or upcoming break and restarts the timer for its kind.

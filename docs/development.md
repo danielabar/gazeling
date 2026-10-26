@@ -9,6 +9,7 @@ make test    # scripts/test.sh: GazelingKit unit tests
 make build   # scripts/build.sh: generate the Xcode project and build
 make run     # scripts/run.sh: build and launch
 make demo    # scripts/demo.sh: build and launch with short timers (break within 30 s)
+make inspect # build and launch with no automatic breaks; start them from the Debug menu items
 make stop    # quit the running app
 make logs    # app log from the last 5 minutes
 ```
@@ -28,11 +29,11 @@ Console.app shows the same logs (search for `com.danielabar.gazeling`).
 
 ## Seeing a break without waiting 20 minutes
 
-Debug builds (what `scripts/run.sh` makes) have a "Debug: start short break" and "Debug: start long break" item in the menu bar menu. They also accept launch arguments, in seconds. Overrides are not saved to the user's settings.
+Debug builds (what `scripts/run.sh` makes) have these items at the bottom of the menu bar menu: "Debug: start short break", "Debug: start long break", "Debug: play exercise" (a submenu: pick any exercise and it plays at once, for its own length) and "Debug: goodbye wave (4 s)". They also accept launch arguments, in seconds. Overrides are not saved to the user's settings.
 
 ```sh
 APP=$(xcodebuild -project Gazeling.xcodeproj -scheme Gazeling -showBuildSettings | awk '/ BUILT_PRODUCTS_DIR/{print $3}')/Gazeling.app
 open "$APP" --args --short-interval 30 --heads-up 10 --short-duration 20
 ```
 
-Flags: `--short-interval`, `--short-duration`, `--long-interval`, `--long-duration`, `--heads-up`, `--break-now`.
+Flags: `--no-auto-breaks` (no scheduled breaks at all, only the Debug menu), `--short-interval`, `--short-duration`, `--long-interval`, `--long-duration`, `--heads-up`, `--break-now`.

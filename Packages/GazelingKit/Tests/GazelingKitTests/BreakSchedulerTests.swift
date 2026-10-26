@@ -232,3 +232,9 @@ private func breakKinds(_ s: inout BreakScheduler, until: TimeInterval) -> [Brea
     s.startBreak(.short, now: at(10))
     #expect(s.state == .onBreak(kind: .short, endsAt: at(30)))
 }
+
+@Test func startBreakCanOverrideTheDuration() {
+    var s = scheduler()
+    s.startBreak(.short, now: at(10), duration: 4)
+    #expect(s.state == .onBreak(kind: .short, endsAt: at(14)))
+}

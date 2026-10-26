@@ -14,6 +14,6 @@ let package = Package(
         .target(name: "GazelingCharacters"),
         // Command-line tool: renders the owl pose sheet to a PNG (`make pose-sheet`).
         .executableTarget(name: "PoseSheet", dependencies: ["GazelingCharacters"]),
-        .testTarget(name: "GazelingKitTests", dependencies: ["GazelingKit"]),
+        .testTarget(name: "GazelingKitTests", dependencies: ["GazelingKit", "GazelingCharacters"]),
     ]
 )
