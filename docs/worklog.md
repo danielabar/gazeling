@@ -4,7 +4,7 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Current status
 
-- **Phase:** 4 (the owl), static pose sheet drawn, look approved (Dusk), static owl wired into the break screen, **animation next**. Phases 0 to 3 complete (Phase 3 verified by the user on a laptop-only setup).
+- **Phase:** 4 (the owl): drawn, animated for all 9 exercises, committed (`cbe02ee`). Waiting for the user's remaining animation feedback. Phases 0 to 3 complete.
 - **Last updated:** 2026-10-26.
 
 ## Phase checklist (from plan.md section 6)
@@ -22,9 +22,9 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 ## Done
 
 - Phase 4, user feedback round 1: blink slowed to a 2 s cycle (instruction no longer says "about 15 times"). The look-far exercise felt creepy (front-facing owl staring at nothing), so it now shows a drawn window scene (`WindowSceneView`: sky gradient, drifting clouds, low sun, hills, trees, grass) beside the owl, which looks toward it (`OwlAnimation.scene(for:)`, `AnimatedOwlView(height:)`). **Option B if the user dislikes this: draw a second owl in profile looking out of the window** (large: new pose sheet and approval). `make inspect` starts the app with no automatic breaks (`--no-auto-breaks`) so the Debug menu items are the only way to start one. `make animation-strips` and `PoseSheet scene` render stills.
-- Phase 4 animation (uncommitted until the user has watched it): `OwlAnimation` in `GazelingCharacters` gives the pose as a pure function of time per script id (all 9 exercises, plus idle breathing, sway and blinks, plus a goodbye wave in the last 2.2 s of every break). `AnimatedOwlView` plays it with `TimelineView`. 71 tests. `make animation-strips` renders frames of every motion to `scratch/owl/animation-strips.png`. **Reduce Motion is deliberately not honoured yet** (user asked for full animation always, to ease testing); add it before release, per plan.md section 2.
-- Phase 4: the static neutral owl is on the break screen, sized at 30% of screen height clamped to 240 to 360 pt (`OwlSize` in `App/Overlay/BreakOverlayView.swift`); user confirmed the size on the laptop screen. `PlaceholderCharacter` deleted. Next: animation.
-- Phase 4 so far: the owl is drawn in `Packages/GazelingKit/Sources/GazelingCharacters` as separate parts (`OwlView`), driven by `OwlPose` (plain numbers: gaze x/y, eyelid, smile, brow, head tilt, each wing raise, wing cover). Three palettes. `OwlPoseSheet` rendering: `make pose-sheet` writes `scratch/owl/pose-sheet.png` through `ImageRenderer` in the `PoseSheet` command-line target, so the agent can view its own drawing (the Read tool shows PNGs) without screen-recording permission. Not yet used by the app.
+- Phase 4 animation: `OwlAnimation` in `GazelingCharacters` gives the pose as a pure function of time per script id (all 9 exercises, plus idle breathing, sway and blinks, plus a goodbye wave in the last 2.2 s of every break). `AnimatedOwlView` plays it with `TimelineView`. 71 tests. `make animation-strips` renders frames of every motion to `scratch/owl/animation-strips.png`. **Reduce Motion is deliberately not honoured yet** (user asked for full animation always, to ease testing); add it before release, per plan.md section 2.
+- Phase 4: the owl is on the break screen, sized at 30% of screen height clamped to 240 to 360 pt (`OwlSize` in `App/Overlay/BreakOverlayView.swift`); user confirmed the size on the laptop screen. `PlaceholderCharacter` deleted.
+- Phase 4 so far: the owl is drawn in `Packages/GazelingKit/Sources/GazelingCharacters` as separate parts (`OwlView`), driven by `OwlPose` (plain numbers: gaze x/y, eyelid, smile, brow, head tilt, each wing raise, wing cover). Three palettes. `OwlPoseSheet` rendering: `make pose-sheet` writes `scratch/owl/pose-sheet.png` through `ImageRenderer` in the `PoseSheet` command-line target, so the agent can view its own drawing (the Read tool shows PNGs) without screen-recording permission. Used by the break screen through `AnimatedOwlView`.
 
 - Phase 3 verified by the user on the laptop screen: heads-up notification, dim, exercise text and countdown, sounds, Esc and Skip, pause/postpone/skip menu. Three overlay bugs found and fixed during manual testing (see Challenges). `make` targets added (`make demo` for a break within 30 s).
 - Phase 3 code: `AppState` and `BreakSession` and the adapter protocols in `GazelingKit` (59 tests, fakes for every adapter); real adapters in `App/Adapters`, `App/Overlay`; menu in `App/Views/MenuContent.swift`; debug launch arguments in `App/DebugOptions.swift`; `App/Resources/Localizable.xcstrings`. `App/Spikes` deleted. Agent verified: tests pass, app builds, app runs 30 s with short debug intervals without crashing. The agent cannot see the screen, so the overlay, sounds and notification flow are unverified.
@@ -36,12 +36,12 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Next
 
-- Phase 4: **user chose the Dusk palette** (indigo). Look and size approved. Re-check the size on a larger external monitor when available. Review sheet: `make pose-sheet`. Then: animation scripts per exercise (one per `animationScript` id in `exercises.json`), idle behaviours (blinks, head tilt), Reduce Motion fallback, screenshots into `docs/`.
-- Use `make demo` to test a break by hand.
-
-- Phase 3 leftovers (need the external monitor): monitor plugged in or out mid-break, dimming on a second screen with the new panel window, launch-at-login in the sandbox.
-- Untested in Phase 1 (do during Phase 3): monitor plugged in/out mid-break, launch-at-login in the sandbox.
-- Personal Team signing not needed so far (ad-hoc signing works for notifications and idle).
+1. **Phase 4, finish:** the user is reviewing the animations with `make inspect` (Debug menu, play any exercise) and will send feedback. Apply it, then finish: screenshots of each animation into `docs/`, and check the owl size on a larger external monitor when available (`OwlSize` in `App/Overlay/BreakOverlayView.swift`). If the user dislikes the look-far window scene, option B is a second owl drawn in profile (needs a new pose sheet and approval).
+2. **Reduce Motion** is deliberately not honoured yet (the user wants full animation for testing). Add it before release (plan.md section 2): `\.accessibilityReduceMotion` in `AnimatedOwlView`, with simple fades and held poses.
+3. **Phase 5** (settings window, first-run setup, icons, launch at login, VoiceOver) is next after Phase 4.
+4. **Needs the external monitor (Phase 3 leftovers):** monitor plugged in or out mid-break, dimming on a second screen with the panel window, launch-at-login in the sandbox.
+5. Not built: Skip and Postpone buttons on the heads-up notification itself (they are in the menu).
+6. Personal Team signing is not needed so far (ad-hoc signing works for notifications and idle).
 
 ## Deviations from the plan
 
