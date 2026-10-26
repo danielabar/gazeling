@@ -4,7 +4,7 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Current status
 
-- **Phase:** 4 (the owl), starting. Phases 0 to 3 complete (Phase 3 verified by the user on a laptop-only setup).
+- **Phase:** 4 (the owl), static pose sheet drawn, **waiting for the user to approve the look** (palette and poses). No animation work until then. Phases 0 to 3 complete (Phase 3 verified by the user on a laptop-only setup).
 - **Last updated:** 2026-10-26.
 
 ## Phase checklist (from plan.md section 6)
@@ -20,6 +20,8 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Done
 
+- Phase 4 so far: the owl is drawn in `Packages/GazelingKit/Sources/GazelingCharacters` as separate parts (`OwlView`), driven by `OwlPose` (plain numbers: gaze x/y, eyelid, smile, brow, head tilt, each wing raise, wing cover). Three palettes. `OwlPoseSheet` rendering: `make pose-sheet` writes `scratch/owl/pose-sheet.png` through `ImageRenderer` in the `PoseSheet` command-line target, so the agent can view its own drawing (the Read tool shows PNGs) without screen-recording permission. Not yet used by the app.
+
 - Phase 3 verified by the user on the laptop screen: heads-up notification, dim, exercise text and countdown, sounds, Esc and Skip, pause/postpone/skip menu. Three overlay bugs found and fixed during manual testing (see Challenges). `make` targets added (`make demo` for a break within 30 s).
 - Phase 3 code: `AppState` and `BreakSession` and the adapter protocols in `GazelingKit` (59 tests, fakes for every adapter); real adapters in `App/Adapters`, `App/Overlay`; menu in `App/Views/MenuContent.swift`; debug launch arguments in `App/DebugOptions.swift`; `App/Resources/Localizable.xcstrings`. `App/Spikes` deleted. Agent verified: tests pass, app builds, app runs 30 s with short debug intervals without crashing. The agent cannot see the screen, so the overlay, sounds and notification flow are unverified.
 - Phase 2: `Exercise`, `ExerciseCatalog`, `exercises.json`, `Settings` + stores, `ExercisePicker`, `BreakPlan`, `BreakScheduler`, all test-first with no real clock. App still builds under Swift 6.
@@ -30,13 +32,17 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Next
 
-- Phase 4: draw the owl (see plan.md, Owl artwork). First a static pose sheet for the user to approve, then animation. Use `make demo` to test a break by hand.
+- Phase 4: user reviews `scratch/owl/pose-sheet.png` (`make pose-sheet` renders and opens it) and picks a palette (Dusk indigo, Honey amber or Mist blue-grey) and requests changes. Then: replace `App/Characters/PlaceholderCharacter.swift` with `OwlView` (add `GazelingCharacters` to `project.yml` dependencies), animation scripts per exercise (one per `animationScript` id in `exercises.json`), idle behaviours (blinks, head tilt), Reduce Motion fallback, screenshots into `docs/`.
+- Use `make demo` to test a break by hand.
 
 - Phase 3 leftovers (need the external monitor): monitor plugged in or out mid-break, dimming on a second screen with the new panel window, launch-at-login in the sandbox.
 - Untested in Phase 1 (do during Phase 3): monitor plugged in/out mid-break, launch-at-login in the sandbox.
 - Personal Team signing not needed so far (ad-hoc signing works for notifications and idle).
 
 ## Deviations from the plan
+
+- The owl lives in a second package target, `GazelingCharacters` (SwiftUI), not in `App/Characters/`. Reason: it can be rendered and tested from the command line (`make pose-sheet`), and `GazelingKit` stays Foundation-only. The app will link it through `project.yml`.
+- `.swift-format` sets 4-space indentation (the default is 2); the whole codebase was reformatted once.
 
 - Planning docs: `plan.md`, `research.md`, `names.md` are in `docs/planning/`. The brainstorm files (`stream-of-consciousness.md`, `eye-break-mac-app-conversation.md`, `prompt.md`) are in `scratch/` (globally gitignored, not part of the project). The plan said all go to `docs/planning/`; the user asked for brainstorm files to go to scratch.
 - `git init` was skipped in Phase 0 at the user's request and done after Phase 1 (commit `44200ae`, branch `main`, no remote).
