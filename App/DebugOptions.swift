@@ -16,11 +16,26 @@ struct DebugOptions {
                 guard let i = arguments.firstIndex(of: flag), i + 1 < arguments.count else { return nil }
                 return TimeInterval(arguments[i + 1].trimmingSuffix("s"))
             }
-            if let v = seconds("--short-interval") { settings.shortBreakInterval = v; overridden = true }
-            if let v = seconds("--short-duration") { settings.shortBreakDuration = v; overridden = true }
-            if let v = seconds("--long-interval") { settings.longBreakInterval = v; overridden = true }
-            if let v = seconds("--long-duration") { settings.longBreakDuration = v; overridden = true }
-            if let v = seconds("--heads-up") { settings.headsUpLead = v; overridden = true }
+            if let v = seconds("--short-interval") {
+                settings.shortBreakInterval = v
+                overridden = true
+            }
+            if let v = seconds("--short-duration") {
+                settings.shortBreakDuration = v
+                overridden = true
+            }
+            if let v = seconds("--long-interval") {
+                settings.longBreakInterval = v
+                overridden = true
+            }
+            if let v = seconds("--long-duration") {
+                settings.longBreakDuration = v
+                overridden = true
+            }
+            if let v = seconds("--heads-up") {
+                settings.headsUpLead = v
+                overridden = true
+            }
             if overridden { self.settings = settings }
             breakNow = arguments.contains("--break-now")
         #endif

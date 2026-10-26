@@ -39,7 +39,9 @@ struct MenuContent: View {
     private var statusText: String {
         switch appState.state {
         case .paused(let until):
-            if let until { return String(localized: "Paused until \(until.formatted(date: .omitted, time: .shortened))") }
+            if let until {
+                return String(localized: "Paused until \(until.formatted(date: .omitted, time: .shortened))")
+            }
             return String(localized: "Paused")
         case .onBreak:
             return String(localized: "On a break")

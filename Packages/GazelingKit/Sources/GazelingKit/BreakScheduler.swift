@@ -1,144 +1,144 @@
 import Foundation
 
 public enum BreakState: Equatable, Sendable {
-  case working
-  /// A break of `kind` starts at `startsAt`. The app shows the heads-up notification.
-  case headsUp(kind: BreakKind, startsAt: Date)
-  case onBreak(kind: BreakKind, endsAt: Date)
-  /// `until` is nil for "until I resume".
-  case paused(until: Date?)
+    case working
+    /// A break of `kind` starts at `startsAt`. The app shows the heads-up notification.
+    case headsUp(kind: BreakKind, startsAt: Date)
+    case onBreak(kind: BreakKind, endsAt: Date)
+    /// `until` is nil for "until I resume".
+    case paused(until: Date?)
 }
 
 /// Decides when breaks happen. It has no timers: the app calls `update` about once a second and
 /// reacts to the returned state. Time and idle seconds are passed in, so tests need no real clock.
 public struct BreakScheduler: Sendable {
-  /// If two `update` calls are further apart than this, the Mac was asleep (or the app was
-  /// suspended). The gap counts as idle time, so waking the Mac never starts a break at once.
-  public static let clockJumpThreshold: TimeInterval = 60
+    /// If two `update` calls are further apart than this, the Mac was asleep (or the app was
+    /// suspended). The gap counts as idle time, so waking the Mac never starts a break at once.
+    public static let clockJumpThreshold: TimeInterval = 60
 
-  public private(set) var state: BreakState = .working
-  public private(set) var shortDue: Date
-  public private(set) var longDue: Date
-  private var settings: Settings
-  private var availableKinds: Set<BreakKind>
-  private var lastUpdate: Date
+    public private(set) var state: BreakState = .working
+    public private(set) var shortDue: Date
+    public private(set) var longDue: Date
+    private var settings: Settings
+    private var availableKinds: Set<BreakKind>
+    private var lastUpdate: Date
 
-  public init(settings: Settings, availableKinds: Set<BreakKind>, now: Date) {
-    self.settings = settings
-    self.availableKinds = availableKinds
-    self.lastUpdate = now
-    self.shortDue = now.addingTimeInterval(settings.shortBreakInterval)
-    self.longDue = now.addingTimeInterval(settings.longBreakInterval)
-  }
+    public init(settings: Settings, availableKinds: Set<BreakKind>, now: Date) {
+        self.settings = settings
+        self.availableKinds = availableKinds
+        self.lastUpdate = now
+        self.shortDue = now.addingTimeInterval(settings.shortBreakInterval)
+        self.longDue = now.addingTimeInterval(settings.longBreakInterval)
+    }
 
-  /// Applies changed settings and restarts both timers.
-  public mutating func apply(settings: Settings, availableKinds: Set<BreakKind>, now: Date) {
-    self.settings = settings
-    self.availableKinds = availableKinds
-    if case .paused = state {} else { state = .working }
-    reset(.long, now: now)
-  }
-
-  @discardableResult
-  public mutating func update(now: Date, idleSeconds: TimeInterval) -> BreakState {
-    let gap = now.timeIntervalSince(lastUpdate)
-    lastUpdate = now
-    let idle = gap > Self.clockJumpThreshold ? max(idleSeconds, gap) : idleSeconds
-
-    switch state {
-    case .paused(let until):
-      if let until, now >= until {
+    /// Applies changed settings and restarts both timers.
+    public mutating func apply(settings: Settings, availableKinds: Set<BreakKind>, now: Date) {
+        self.settings = settings
+        self.availableKinds = availableKinds
+        if case .paused = state {} else { state = .working }
         reset(.long, now: now)
-        state = .working
-      }
-    case .onBreak(let kind, let endsAt):
-      // Idle is expected during a break, so it is ignored. Timers restart when the break ends.
-      if now >= endsAt {
-        reset(kind, now: now)
-        state = .working
-      }
-    case .headsUp(let kind, let startsAt):
-      if idle >= settings.breakDuration(for: kind) {
-        // The user already rested for a whole break.
-        reset(kind, now: now)
-        state = .working
-      } else if now >= startsAt {
-        state = .onBreak(
-          kind: kind, endsAt: now.addingTimeInterval(settings.breakDuration(for: kind)))
-      }
-    case .working:
-      if idle >= settings.longBreakDuration {
-        reset(.long, now: now)
-      } else if idle >= settings.shortBreakDuration {
-        reset(.short, now: now)
-      }
-      if let next = nextBreak() {
-        if now >= next.due {
-          state = .onBreak(
-            kind: next.kind, endsAt: now.addingTimeInterval(settings.breakDuration(for: next.kind)))
-        } else if now >= next.due.addingTimeInterval(-settings.headsUpLead) {
-          state = .headsUp(kind: next.kind, startsAt: next.due)
+    }
+
+    @discardableResult
+    public mutating func update(now: Date, idleSeconds: TimeInterval) -> BreakState {
+        let gap = now.timeIntervalSince(lastUpdate)
+        lastUpdate = now
+        let idle = gap > Self.clockJumpThreshold ? max(idleSeconds, gap) : idleSeconds
+
+        switch state {
+        case .paused(let until):
+            if let until, now >= until {
+                reset(.long, now: now)
+                state = .working
+            }
+        case .onBreak(let kind, let endsAt):
+            // Idle is expected during a break, so it is ignored. Timers restart when the break ends.
+            if now >= endsAt {
+                reset(kind, now: now)
+                state = .working
+            }
+        case .headsUp(let kind, let startsAt):
+            if idle >= settings.breakDuration(for: kind) {
+                // The user already rested for a whole break.
+                reset(kind, now: now)
+                state = .working
+            } else if now >= startsAt {
+                state = .onBreak(
+                    kind: kind, endsAt: now.addingTimeInterval(settings.breakDuration(for: kind)))
+            }
+        case .working:
+            if idle >= settings.longBreakDuration {
+                reset(.long, now: now)
+            } else if idle >= settings.shortBreakDuration {
+                reset(.short, now: now)
+            }
+            if let next = nextBreak() {
+                if now >= next.due {
+                    state = .onBreak(
+                        kind: next.kind, endsAt: now.addingTimeInterval(settings.breakDuration(for: next.kind)))
+                } else if now >= next.due.addingTimeInterval(-settings.headsUpLead) {
+                    state = .headsUp(kind: next.kind, startsAt: next.due)
+                }
+            }
         }
-      }
+        return state
     }
-    return state
-  }
 
-  /// Starts a break immediately (debug menu, launch arguments). Does nothing if paused or the kind is unavailable.
-  public mutating func startBreak(_ kind: BreakKind, now: Date) {
-    guard availableKinds.contains(kind) else { return }
-    if case .paused = state { return }
-    state = .onBreak(kind: kind, endsAt: now.addingTimeInterval(settings.breakDuration(for: kind)))
-  }
-
-  /// Cancels the current or upcoming break and restarts the timer for its kind.
-  public mutating func skip(now: Date) {
-    let kind: BreakKind
-    switch state {
-    case .paused: return
-    case .headsUp(let k, _), .onBreak(let k, _): kind = k
-    case .working:
-      guard let next = nextBreak() else { return }
-      kind = next.kind
+    /// Starts a break immediately (debug menu, launch arguments). Does nothing if paused or the kind is unavailable.
+    public mutating func startBreak(_ kind: BreakKind, now: Date) {
+        guard availableKinds.contains(kind) else { return }
+        if case .paused = state { return }
+        state = .onBreak(kind: kind, endsAt: now.addingTimeInterval(settings.breakDuration(for: kind)))
     }
-    reset(kind, now: now)
-    state = .working
-  }
 
-  /// Delays the break announced by the heads-up. Does nothing in other states.
-  public mutating func postpone(now: Date) {
-    guard case .headsUp(let kind, _) = state else { return }
-    let due = now.addingTimeInterval(settings.postponeDuration)
-    if kind == .short { shortDue = due } else { longDue = due }
-    state = .working
-  }
+    /// Cancels the current or upcoming break and restarts the timer for its kind.
+    public mutating func skip(now: Date) {
+        let kind: BreakKind
+        switch state {
+        case .paused: return
+        case .headsUp(let k, _), .onBreak(let k, _): kind = k
+        case .working:
+            guard let next = nextBreak() else { return }
+            kind = next.kind
+        }
+        reset(kind, now: now)
+        state = .working
+    }
 
-  public mutating func pause(until: Date?) {
-    state = .paused(until: until)
-  }
+    /// Delays the break announced by the heads-up. Does nothing in other states.
+    public mutating func postpone(now: Date) {
+        guard case .headsUp(let kind, _) = state else { return }
+        let due = now.addingTimeInterval(settings.postponeDuration)
+        if kind == .short { shortDue = due } else { longDue = due }
+        state = .working
+    }
 
-  public mutating func resume(now: Date) {
-    guard case .paused = state else { return }
-    reset(.long, now: now)
-    state = .working
-  }
+    public mutating func pause(until: Date?) {
+        state = .paused(until: until)
+    }
 
-  /// Timers restart when a break ends or is skipped, not when it starts. A long break restarts both.
-  private mutating func reset(_ kind: BreakKind, now: Date) {
-    shortDue = now.addingTimeInterval(settings.shortBreakInterval)
-    if kind == .long { longDue = now.addingTimeInterval(settings.longBreakInterval) }
-  }
+    public mutating func resume(now: Date) {
+        guard case .paused = state else { return }
+        reset(.long, now: now)
+        state = .working
+    }
 
-  /// The long break replaces a short one that would fall within half a short interval before it.
-  /// Otherwise a short break could end just before the long one starts.
-  public func nextBreak() -> (kind: BreakKind, due: Date)? {
-    let shortOn = availableKinds.contains(.short)
-    let longOn = availableKinds.contains(.long)
-    let shortFirst =
-      shortOn
-      && (!longOn || shortDue <= longDue.addingTimeInterval(-settings.shortBreakInterval / 2))
-    if shortFirst { return (.short, shortDue) }
-    if longOn { return (.long, longDue) }
-    return nil
-  }
+    /// Timers restart when a break ends or is skipped, not when it starts. A long break restarts both.
+    private mutating func reset(_ kind: BreakKind, now: Date) {
+        shortDue = now.addingTimeInterval(settings.shortBreakInterval)
+        if kind == .long { longDue = now.addingTimeInterval(settings.longBreakInterval) }
+    }
+
+    /// The long break replaces a short one that would fall within half a short interval before it.
+    /// Otherwise a short break could end just before the long one starts.
+    public func nextBreak() -> (kind: BreakKind, due: Date)? {
+        let shortOn = availableKinds.contains(.short)
+        let longOn = availableKinds.contains(.long)
+        let shortFirst =
+            shortOn
+            && (!longOn || shortDue <= longDue.addingTimeInterval(-settings.shortBreakInterval / 2))
+        if shortFirst { return (.short, shortDue) }
+        if longOn { return (.long, longDue) }
+        return nil
+    }
 }

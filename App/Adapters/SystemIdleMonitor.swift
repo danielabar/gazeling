@@ -1,5 +1,5 @@
-import Foundation
 import CoreGraphics
+import Foundation
 import GazelingKit
 
 struct SystemIdleMonitor: IdleMonitor {

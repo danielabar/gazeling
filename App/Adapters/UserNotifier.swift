@@ -1,7 +1,6 @@
 import GazelingKit
-import os
-
 @preconcurrency import UserNotifications
+import os
 
 /// Heads-up notification. The delegate makes the banner show even while the app counts as frontmost,
 /// which a menu bar app often does (see docs/architecture.md).
