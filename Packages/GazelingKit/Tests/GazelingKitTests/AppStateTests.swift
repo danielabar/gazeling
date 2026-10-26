@@ -185,3 +185,62 @@ private final class Harness {
     h.app.playNow(exercise: h.app.exercises[0], seconds: 4)
     #expect(h.app.session?.totalSeconds == 4)
 }
+
+@Test @MainActor func debugTimingOverridesAreNeverSaved() {
+    let store = InMemorySettingsStore()
+    let fakes = Fakes()
+    var overrides = TimingOverrides()
+    overrides.shortInterval = 10
+    overrides.longInterval = 30
+    let app = AppState(
+        catalog: try! ExerciseCatalog.bundled(), store: store, overrides: overrides, idleMonitor: fakes,
+        notifier: fakes, overlay: fakes, sound: fakes)
+    #expect(app.settings.shortBreakInterval == Settings().shortBreakInterval)
+    var edited = app.settings
+    edited.soundsEnabled = false
+    app.apply(settings: edited)
+    #expect(store.load().shortBreakInterval == Settings().shortBreakInterval)
+    #expect(store.load().longBreakInterval == Settings().longBreakInterval)
+    #expect(!store.load().soundsEnabled)
+}
+
+@Test @MainActor func debugOverridesStillDriveTheScheduler() async {
+    let fakes = Fakes()
+    var overrides = TimingOverrides()
+    overrides.shortInterval = 10
+    overrides.headsUpLead = 3
+    var now = Date(timeIntervalSinceReferenceDate: 0)
+    let app = AppState(
+        catalog: try! ExerciseCatalog.bundled(), store: InMemorySettingsStore(), overrides: overrides,
+        idleMonitor: fakes, notifier: fakes, overlay: fakes, sound: fakes, clock: { now })
+    for _ in 0..<7 {
+        now = now.addingTimeInterval(1)
+        app.tick()
+    }
+    await Task.yield()
+    #expect(fakes.events == ["headsUp:short:3"])
+}
+
+@Test @MainActor func soundsOffMeansNoChimes() async {
+    let h = Harness()
+    var s = h.app.settings
+    s.soundsEnabled = false
+    h.app.apply(settings: s)
+    await h.advance(20 * 60)
+    await h.advance(20)
+    #expect(!h.fakes.events.contains("startSound") && !h.fakes.events.contains("endSound"))
+    #expect(h.fakes.events.contains("show"))
+}
+
+@Test @MainActor func settingsAreValidatedBeforeTheyAreSaved() {
+    let store = InMemorySettingsStore()
+    let fakes = Fakes()
+    let app = AppState(
+        catalog: try! ExerciseCatalog.bundled(), store: store, idleMonitor: fakes, notifier: fakes,
+        overlay: fakes, sound: fakes)
+    var s = Settings()
+    s.shortBreakInterval = 1
+    app.apply(settings: s)
+    #expect(store.load().shortBreakInterval == Settings.shortIntervalRange.lowerBound)
+    #expect(app.settings.shortBreakInterval == Settings.shortIntervalRange.lowerBound)
+}

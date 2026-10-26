@@ -8,7 +8,7 @@ struct GazelingApp: App {
     init() {
         let debug = DebugOptions()
         let state = AppState(
-            catalog: try! ExerciseCatalog.bundled(), store: UserDefaultsSettingsStore(), settings: debug.settings,
+            catalog: try! ExerciseCatalog.bundled(), store: UserDefaultsSettingsStore(), overrides: debug.overrides,
             idleMonitor: SystemIdleMonitor(), notifier: UserNotifier(), overlay: OverlayWindowPresenter(),
             sound: SystemSoundPlayer())
         state.start()

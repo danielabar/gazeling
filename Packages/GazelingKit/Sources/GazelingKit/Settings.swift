@@ -15,8 +15,66 @@ public struct Settings: Codable, Sendable, Equatable {
     public var disabledExerciseIDs: Set<String> = []
     /// Per-exercise override of the exercise's default break kinds.
     public var breakKindOverrides: [String: Set<BreakKind>] = [:]
+    /// Which screen shows the owl and the exercise text. Every screen is dimmed either way.
+    public var overlayScreen: OverlayScreen = .pointer
+    public var soundsEnabled = true
 
     public init() {}
+
+    // MARK: Limits
+
+    public static let shortIntervalRange: ClosedRange<TimeInterval> = 60...7200
+    public static let shortDurationRange: ClosedRange<TimeInterval> = 10...120
+    public static let longIntervalRange: ClosedRange<TimeInterval> = 300...14400
+    public static let longDurationRange: ClosedRange<TimeInterval> = 60...1800
+    public static let headsUpRange: ClosedRange<TimeInterval> = 0...120
+    public static let postponeRange: ClosedRange<TimeInterval> = 60...1800
+
+    /// A copy with every value inside its range, long breaks longer and rarer than short ones, and the
+    /// heads-up shorter than the interval. Used before saving, so the UI and the model share the limits.
+    public func validated() -> Settings {
+        var s = self
+        s.shortBreakInterval = shortBreakInterval.clamped(to: Self.shortIntervalRange)
+        s.shortBreakDuration = shortBreakDuration.clamped(to: Self.shortDurationRange)
+        s.longBreakInterval = max(
+            longBreakInterval.clamped(to: Self.longIntervalRange), s.shortBreakInterval + 60)
+        s.longBreakDuration = max(
+            longBreakDuration.clamped(to: Self.longDurationRange), s.shortBreakDuration)
+        s.headsUpLead = min(headsUpLead.clamped(to: Self.headsUpRange), s.shortBreakInterval / 2)
+        s.postponeDuration = postponeDuration.clamped(to: Self.postponeRange)
+        return s
+    }
+
+    // MARK: Exercises
+
+    public func isEnabled(_ exercise: Exercise) -> Bool {
+        !disabledExerciseIDs.contains(exercise.id)
+    }
+
+    public mutating func setEnabled(_ enabled: Bool, for exercise: Exercise) {
+        if enabled { disabledExerciseIDs.remove(exercise.id) } else { disabledExerciseIDs.insert(exercise.id) }
+    }
+
+    /// Setting the kinds back to the exercise's defaults removes the override, so a later change to the
+    /// defaults still reaches this user.
+    public mutating func setBreakKinds(_ kinds: Set<BreakKind>, for exercise: Exercise) {
+        if kinds == exercise.defaultBreakKinds {
+            breakKindOverrides[exercise.id] = nil
+        } else {
+            breakKindOverrides[exercise.id] = kinds
+        }
+    }
+
+    /// The values that decide when breaks happen. Changing any of them restarts the timers.
+    struct Timings: Equatable {
+        var shortInterval, shortDuration, longInterval, longDuration, headsUp: TimeInterval
+    }
+
+    var timings: Timings {
+        Timings(
+            shortInterval: shortBreakInterval, shortDuration: shortBreakDuration, longInterval: longBreakInterval,
+            longDuration: longBreakDuration, headsUp: headsUpLead)
+    }
 
     public func breakKinds(for exercise: Exercise) -> Set<BreakKind> {
         breakKindOverrides[exercise.id] ?? exercise.defaultBreakKinds
@@ -51,5 +109,38 @@ public struct Settings: Codable, Sendable, Equatable {
         breakKindOverrides =
             try c.decodeIfPresent([String: Set<BreakKind>].self, forKey: .breakKindOverrides)
             ?? d.breakKindOverrides
+        overlayScreen = try c.decodeIfPresent(OverlayScreen.self, forKey: .overlayScreen) ?? d.overlayScreen
+        soundsEnabled = try c.decodeIfPresent(Bool.self, forKey: .soundsEnabled) ?? d.soundsEnabled
+    }
+}
+
+/// Where the owl and exercise text appear. All screens are dimmed in every case.
+public enum OverlayScreen: String, Codable, Sendable, CaseIterable {
+    /// The screen the mouse pointer is on.
+    case pointer
+    case main
+    case all
+}
+
+extension TimeInterval {
+    fileprivate func clamped(to range: ClosedRange<TimeInterval>) -> TimeInterval {
+        min(max(self, range.lowerBound), range.upperBound)
+    }
+}
+
+/// Debug-only timing changes (launch arguments). They are laid over the user's settings and never saved.
+public struct TimingOverrides: Equatable, Sendable {
+    public var shortInterval, shortDuration, longInterval, longDuration, headsUpLead: TimeInterval?
+
+    public init() {}
+
+    public func applied(to settings: Settings) -> Settings {
+        var s = settings
+        if let shortInterval { s.shortBreakInterval = shortInterval }
+        if let shortDuration { s.shortBreakDuration = shortDuration }
+        if let longInterval { s.longBreakInterval = longInterval }
+        if let longDuration { s.longBreakDuration = longDuration }
+        if let headsUpLead { s.headsUpLead = headsUpLead }
+        return s
     }
 }

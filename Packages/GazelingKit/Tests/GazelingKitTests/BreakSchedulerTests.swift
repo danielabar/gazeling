@@ -238,3 +238,56 @@ private func breakKinds(_ s: inout BreakScheduler, until: TimeInterval) -> [Brea
     s.startBreak(.short, now: at(10), duration: 4)
     #expect(s.state == .onBreak(kind: .short, endsAt: at(14)))
 }
+
+@Test func changingNothingTimingRelatedKeepsTheCountdown() {
+    var s = scheduler()
+    run(&s, from: 0, to: 10 * min)
+    var changed = Settings()
+    changed.soundsEnabled = false
+    changed.disabledExerciseIDs = ["walk"]
+    s.apply(settings: changed, availableKinds: both, now: at(10 * min))
+    #expect(s.shortDue == at(20 * min) && s.longDue == at(60 * min))
+}
+
+@Test func changingAnIntervalRestartsTheTimers() {
+    var s = scheduler()
+    run(&s, from: 0, to: 10 * min)
+    var changed = Settings()
+    changed.shortBreakDuration = 30
+    s.apply(settings: changed, availableKinds: both, now: at(10 * min))
+    #expect(s.shortDue == at(30 * min))
+}
+
+@Test func aKindThatBecomesAvailableRestartsOnlyItsOwnTimer() {
+    var s = scheduler(kinds: [.short])
+    run(&s, from: 0, to: 10 * min)
+    s.apply(settings: Settings(), availableKinds: both, now: at(10 * min))
+    #expect(s.longDue == at(70 * min))
+    #expect(s.shortDue == at(20 * min))
+}
+
+@Test func anUnrelatedChangeKeepsTheHeadsUp() {
+    var s = scheduler()
+    run(&s, from: 0, to: 20 * min - 30)
+    let state = s.state
+    var changed = Settings()
+    changed.soundsEnabled = false
+    s.apply(settings: changed, availableKinds: both, now: at(20 * min - 30))
+    #expect(s.state == state)
+}
+
+@Test func aHeadsUpForAKindThatBecomesUnavailableIsCancelled() {
+    var s = scheduler()
+    run(&s, from: 0, to: 20 * min - 30)
+    s.apply(settings: Settings(), availableKinds: [.long], now: at(20 * min - 30))
+    #expect(s.state == .working)
+}
+
+@Test func changingSettingsDoesNotEndABreakInProgress() {
+    var s = scheduler()
+    run(&s, from: 0, to: 20 * min + 5)
+    var changed = Settings()
+    changed.shortBreakInterval = 10 * 60
+    s.apply(settings: changed, availableKinds: both, now: at(20 * min + 5))
+    #expect(s.state == .onBreak(kind: .short, endsAt: at(20 * min + 20)))
+}

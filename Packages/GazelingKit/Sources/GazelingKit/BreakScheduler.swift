@@ -31,12 +31,34 @@ public struct BreakScheduler: Sendable {
         self.longDue = now.addingTimeInterval(settings.longBreakInterval)
     }
 
-    /// Applies changed settings and restarts both timers.
+    /// Applies changed settings. The countdown restarts only if a timing value changed, or for a break
+    /// kind that has just become available. Other changes (an exercise turned off, sounds) leave it alone.
     public mutating func apply(settings: Settings, availableKinds: Set<BreakKind>, now: Date) {
+        let timingsChanged = settings.timings != self.settings.timings
+        let newlyAvailable = availableKinds.subtracting(self.availableKinds)
         self.settings = settings
         self.availableKinds = availableKinds
-        if case .paused = state {} else { state = .working }
-        reset(.long, now: now)
+
+        if timingsChanged {
+            reset(.long, now: now)
+        } else {
+            for kind in newlyAvailable { restartTimer(for: kind, now: now) }
+        }
+
+        switch state {
+        case .headsUp(let kind, _):
+            // The announced break may no longer be due when or where it was.
+            if timingsChanged || !availableKinds.contains(kind) { state = .working }
+        case .onBreak(let kind, _):
+            if !availableKinds.contains(kind) { state = .working }
+        case .working, .paused:
+            break
+        }
+    }
+
+    private mutating func restartTimer(for kind: BreakKind, now: Date) {
+        let due = now.addingTimeInterval(settings.breakInterval(for: kind))
+        if kind == .short { shortDue = due } else { longDue = due }
     }
 
     @discardableResult

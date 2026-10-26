@@ -20,18 +20,25 @@ public final class AppState {
     @ObservationIgnored private let clock: () -> Date
     @ObservationIgnored private var tickTask: Task<Void, Never>?
     @ObservationIgnored private var forcedPlan: BreakPlan?
+    @ObservationIgnored private let overrides: TimingOverrides
+
+    /// The stored settings with any debug timing overrides on top. This is what the scheduler uses.
+    /// `settings` is what the settings window shows and saves, so overrides never reach the store.
+    private var effectiveSettings: Settings { overrides.applied(to: settings) }
     /// Every exercise in the catalog, for the debug menu.
     public let exercises: [Exercise]
 
-    /// `settings` overrides the stored settings without saving them (debug launch arguments).
+    /// `overrides` change the timings without being saved (debug launch arguments).
     public init(
-        catalog: ExerciseCatalog, store: SettingsStore, settings: Settings? = nil,
+        catalog: ExerciseCatalog, store: SettingsStore, overrides: TimingOverrides = TimingOverrides(),
         idleMonitor: IdleMonitor, notifier: Notifier, overlay: OverlayPresenter, sound: SoundPlayer,
         clock: @escaping () -> Date = Date.init
     ) {
-        let settings = settings ?? store.load()
+        let settings = store.load().validated()
+        let effective = overrides.applied(to: settings)
         let picker = ExercisePicker(catalog: catalog)
         self.settings = settings
+        self.overrides = overrides
         self.picker = picker
         self.store = store
         self.idleMonitor = idleMonitor
@@ -41,7 +48,7 @@ public final class AppState {
         self.clock = clock
         self.exercises = catalog.exercises
         self.scheduler = BreakScheduler(
-            settings: settings, availableKinds: picker.availableKinds(settings: settings), now: clock())
+            settings: effective, availableKinds: picker.availableKinds(settings: effective), now: clock())
     }
 
     /// Asks for notification permission and starts polling once a second.
@@ -98,12 +105,14 @@ public final class AppState {
         forcedPlan = nil
     }
 
-    public func apply(settings: Settings) {
-        self.settings = settings
+    /// Validates, saves and applies new settings.
+    public func apply(settings newSettings: Settings) {
+        settings = newSettings.validated()
         store.save(settings)
+        let effective = effectiveSettings
         perform {
             $0.apply(
-                settings: settings, availableKinds: picker.availableKinds(settings: settings), now: clock())
+                settings: effective, availableKinds: picker.availableKinds(settings: effective), now: clock())
         }
     }
 
@@ -147,19 +156,19 @@ public final class AppState {
     }
 
     private func startSession(kind: BreakKind, now: Date) {
-        guard let plan = forcedPlan ?? picker.plan(for: kind, settings: settings) else {
+        guard let plan = forcedPlan ?? picker.plan(for: kind, settings: effectiveSettings) else {
             perform { $0.skip(now: now) }
             return
         }
         let session = BreakSession(plan: plan, startedAt: now)
         self.session = session
         overlay.show(session: session, onSkip: { [weak self] in self?.skipCurrentBreak() })
-        sound.playBreakStart()
+        if settings.soundsEnabled { sound.playBreakStart() }
     }
 
     private func endSession(finished: Bool) {
         overlay.hide()
         session = nil
-        if finished { sound.playBreakEnd() }
+        if finished && settings.soundsEnabled { sound.playBreakEnd() }
     }
 }
