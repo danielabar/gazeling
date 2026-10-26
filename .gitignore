@@ -1,0 +1,6 @@
+# Generated from project.yml
+*.xcodeproj
+xcuserdata/
+DerivedData/
+.build/
+.DS_Store
