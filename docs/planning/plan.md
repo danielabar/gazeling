@@ -291,6 +291,13 @@ Each phase ends with a verifiable check.
 4. Release build, zip, GitHub Release with the Gatekeeper note.
 - *Verify:* a fresh clone builds and tests following only `docs/development.md`.
 
+**Phase 8 (optional, nice to have): choose your own sound**
+Added 2026-10-26 at the product owner's request. Not needed for v1; do after Phases 5 and 6.
+1. Settings: separate sound choice for break start and break end (`Settings` gets two new fields with defaults, so saved settings keep loading). Choices: our bundled chime (the default), any of the macOS system sounds (the names in `/System/Library/Sounds`, played with `NSSound(named:)`), or none.
+2. Settings window: a picker for each, with a button to preview the sound.
+3. Open question: letting users pick their own audio file needs the `com.apple.security.files.user-selected.read-only` sandbox entitlement and a file picker. Decide then whether it is worth it; the system-sound list may be enough.
+- *Verify:* each choice plays at the right moment, "none" is silent, the preview works, and the choice survives relaunch. Confirm that system sounds play inside the App Sandbox (the placeholder Tink and Glass already do).
+
 **Later:** global pause shortcut, additional characters, other languages, voice clips per language, meeting/screen-share detection.
 
 ## 7. Internationalization

@@ -17,6 +17,7 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 - [ ] Phase 5: settings and polish
 - [ ] Phase 6: sound and voice
 - [ ] Phase 7: docs and release
+- [ ] Phase 8 (optional, after 5 and 6): user-chosen break sounds from the system sound list. Added at the user's request; scope in `docs/planning/plan.md` section 6.
 
 ## Done
 
