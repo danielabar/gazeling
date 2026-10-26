@@ -4,7 +4,7 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Current status
 
-- **Phase:** 4 (the owl), static pose sheet drawn, **waiting for the user to approve the look** (palette and poses). No animation work until then. Phases 0 to 3 complete (Phase 3 verified by the user on a laptop-only setup).
+- **Phase:** 4 (the owl), static pose sheet drawn, look approved (Dusk), static owl wired into the break screen, **animation next**. Phases 0 to 3 complete (Phase 3 verified by the user on a laptop-only setup).
 - **Last updated:** 2026-10-26.
 
 ## Phase checklist (from plan.md section 6)
@@ -20,6 +20,7 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Done
 
+- Phase 4: the static neutral owl is on the break screen, sized at 30% of screen height clamped to 240 to 360 pt (`OwlSize` in `App/Overlay/BreakOverlayView.swift`); user confirmed the size on the laptop screen. `PlaceholderCharacter` deleted. Next: animation.
 - Phase 4 so far: the owl is drawn in `Packages/GazelingKit/Sources/GazelingCharacters` as separate parts (`OwlView`), driven by `OwlPose` (plain numbers: gaze x/y, eyelid, smile, brow, head tilt, each wing raise, wing cover). Three palettes. `OwlPoseSheet` rendering: `make pose-sheet` writes `scratch/owl/pose-sheet.png` through `ImageRenderer` in the `PoseSheet` command-line target, so the agent can view its own drawing (the Read tool shows PNGs) without screen-recording permission. Not yet used by the app.
 
 - Phase 3 verified by the user on the laptop screen: heads-up notification, dim, exercise text and countdown, sounds, Esc and Skip, pause/postpone/skip menu. Three overlay bugs found and fixed during manual testing (see Challenges). `make` targets added (`make demo` for a break within 30 s).
@@ -32,7 +33,7 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Next
 
-- Phase 4: user reviews `scratch/owl/pose-sheet.png` (`make pose-sheet` renders and opens it) and picks a palette (Dusk indigo, Honey amber or Mist blue-grey) and requests changes. Then: replace `App/Characters/PlaceholderCharacter.swift` with `OwlView` (add `GazelingCharacters` to `project.yml` dependencies), animation scripts per exercise (one per `animationScript` id in `exercises.json`), idle behaviours (blinks, head tilt), Reduce Motion fallback, screenshots into `docs/`.
+- Phase 4: **user chose the Dusk palette** (indigo). Look and size approved. Re-check the size on a larger external monitor when available. Review sheet: `make pose-sheet`. Then: animation scripts per exercise (one per `animationScript` id in `exercises.json`), idle behaviours (blinks, head tilt), Reduce Motion fallback, screenshots into `docs/`.
 - Use `make demo` to test a break by hand.
 
 - Phase 3 leftovers (need the external monitor): monitor plugged in or out mid-break, dimming on a second screen with the new panel window, launch-at-login in the sandbox.

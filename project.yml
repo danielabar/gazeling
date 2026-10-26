@@ -14,6 +14,8 @@ targets:
     sources: [App]
     dependencies:
       - package: GazelingKit
+      - package: GazelingKit
+        product: GazelingCharacters
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.danielabar.gazeling
