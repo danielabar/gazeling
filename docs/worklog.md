@@ -4,7 +4,7 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Current status
 
-- **Phase:** 3 (working breaks with placeholder character), not started. Phases 0 to 2 complete.
+- **Phase:** 3 (working breaks with placeholder character), code written, **waiting for the user to verify on screen**. Phases 0 to 2 complete.
 - **Last updated:** 2026-10-26.
 
 ## Phase checklist (from plan.md section 6)
@@ -20,6 +20,7 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Done
 
+- Phase 3 code: `AppState` and `BreakSession` and the adapter protocols in `GazelingKit` (59 tests, fakes for every adapter); real adapters in `App/Adapters`, `App/Overlay`; menu in `App/Views/MenuContent.swift`; debug launch arguments in `App/DebugOptions.swift`; `App/Resources/Localizable.xcstrings`. `App/Spikes` deleted. Agent verified: tests pass, app builds, app runs 30 s with short debug intervals without crashing. The agent cannot see the screen, so the overlay, sounds and notification flow are unverified.
 - Phase 2: `Exercise`, `ExerciseCatalog`, `exercises.json`, `Settings` + stores, `ExercisePicker`, `BreakPlan`, `BreakScheduler`, all test-first with no real clock. App still builds under Swift 6.
 - Phase 1: all spikes verified (see Phase 1 notes and `docs/architecture.md`).
 - Phase 0: `project.yml` (XcodeGen), `GazelingKit` package with one test, menu bar app with Quit item, `scripts/{build,test,run}.sh`, LICENSE, README, `.gitignore`. XcodeGen 2.46.0 installed via Homebrew with user approval. Verified: tests pass, build succeeds, app launches as background-only (no Dock icon).
@@ -28,7 +29,7 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Next
 
-- Phase 3: replace `App/Spikes` with real adapters (overlay, notifier, idle monitor, sound) behind protocols. Add `AppState` and `BreakSession` view models: poll `BreakScheduler.update` about once a second, diff the state to trigger heads-up, overlay and chime. Add debug launch arguments and a menu item to start a break now. Localization keys in `exercises.json` need entries in `Localizable.xcstrings` (not created yet).
+- Phase 3 remaining: user verifies on screen the cycle heads-up, dim, exercise text and countdown, end chime, resume, on the laptop screen (dual display not testable yet: also test monitor plug in/out and launch-at-login). Original scope was: replace `App/Spikes` with real adapters (overlay, notifier, idle monitor, sound) behind protocols. Add `AppState` and `BreakSession` view models: poll `BreakScheduler.update` about once a second, diff the state to trigger heads-up, overlay and chime. Add debug launch arguments and a menu item to start a break now. Localization keys in `exercises.json` need entries in `Localizable.xcstrings` (not created yet).
 - Untested in Phase 1 (do during Phase 3): monitor plugged in/out mid-break, launch-at-login in the sandbox.
 - Personal Team signing not needed so far (ad-hoc signing works for notifications and idle).
 
@@ -42,6 +43,10 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 - `exercises.json` is in the package (`Packages/GazelingKit/Sources/GazelingKit/Resources/`), not `App/Resources/` as the plan's layout says, so `swift test` can validate the shipped file.
 - Product decisions made with the user in Phase 2: blink is in the short-break rotation and always in long breaks (not in every short break, since a 20 s break fits one exercise); all eye-movement exercises and palming are tagged short and long, `walk` and `eyes-closed-rest` long only; postpone is 5 minutes; skip restarts the full interval.
 - Long-break plan rule: leftover seconds extend the last step, instead of an eyes-closed rest filler step.
+
+- `AppState`, `BreakSession` and the adapter protocols are in the `GazelingKit` package, not the app target, so they can be unit tested with fakes. They import only Foundation and Observation.
+- Notification Skip/Postpone buttons are not built yet. Skip and Postpone are in the menu bar menu and Skip is on the overlay. Add the notification actions in Phase 5 if wanted.
+- The overlay shows exercise text, countdown and a Skip button on the screen with the pointer; other screens only dim. The screen choice setting comes in Phase 5.
 
 ## Challenges and findings
 

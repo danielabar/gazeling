@@ -3,22 +3,22 @@ import SwiftUI
 
 @main
 struct GazelingApp: App {
+    @State private var appState: AppState
+
     init() {
-        Spikes.observeSleepWake()
-        Spikes.runLaunchArguments()
+        let debug = DebugOptions()
+        let state = AppState(
+            catalog: try! ExerciseCatalog.bundled(), store: UserDefaultsSettingsStore(), settings: debug.settings,
+            idleMonitor: SystemIdleMonitor(), notifier: UserNotifier(), overlay: OverlayWindowPresenter(),
+            sound: SystemSoundPlayer())
+        state.start()
+        if debug.breakNow { state.startBreakNow(.short) }
+        _appState = State(initialValue: state)
     }
 
     var body: some Scene {
-        MenuBarExtra(AppInfo.name, systemImage: "eye") {
-            // Phase 1 spike items. Removed or moved behind debug flags in Phase 3.
-            Button("Spike: dim screens") { Spikes.showOverlay() }
-            Button("Spike: notification") { Spikes.postNotification() }
-            Button("Spike: print idle time") { Spikes.printIdle() }
-            Divider()
-            Button("Quit \(AppInfo.name)") {
-                NSApplication.shared.terminate(nil)
-            }
-            .keyboardShortcut("q")
+        MenuBarExtra("Gazeling", systemImage: "eye") {
+            MenuContent(appState: appState)
         }
     }
 }

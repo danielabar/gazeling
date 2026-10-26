@@ -224,3 +224,11 @@ private func breakKinds(_ s: inout BreakScheduler, until: TimeInterval) -> [Brea
   s.apply(settings: settings, availableKinds: both, now: at(10 * min))
   #expect(s.shortDue == at(15 * min))
 }
+
+@Test func startBreakBeginsImmediatelyAndRespectsAvailability() {
+  var s = scheduler(kinds: [.short])
+  s.startBreak(.long, now: at(10))
+  #expect(s.state == .working)
+  s.startBreak(.short, now: at(10))
+  #expect(s.state == .onBreak(kind: .short, endsAt: at(30)))
+}

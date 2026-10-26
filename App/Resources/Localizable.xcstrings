@@ -1,0 +1,186 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "exercise.blink.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full blinks"
+          }
+        }
+      }
+    },
+    "exercise.blink.instruction": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blink slowly and fully, with a gentle squeeze each time. About 15 times."
+          }
+        }
+      }
+    },
+    "exercise.look-far.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Look far away"
+          }
+        }
+      }
+    },
+    "exercise.look-far.instruction": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Look at something at least 6 metres (20 feet) away, such as out of a window."
+          }
+        }
+      }
+    },
+    "exercise.side-to-side.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eyes side to side"
+          }
+        }
+      }
+    },
+    "exercise.side-to-side.instruction": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep your head still. Look slowly to the far left, then the far right."
+          }
+        }
+      }
+    },
+    "exercise.up-down.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eyes up and down"
+          }
+        }
+      }
+    },
+    "exercise.up-down.instruction": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep your head still. Look slowly up, then down."
+          }
+        }
+      }
+    },
+    "exercise.circle-left.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eye circles, left"
+          }
+        }
+      }
+    },
+    "exercise.circle-left.instruction": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep your head still. Slowly trace a big circle with your eyes, counter-clockwise."
+          }
+        }
+      }
+    },
+    "exercise.circle-right.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eye circles, right"
+          }
+        }
+      }
+    },
+    "exercise.circle-right.instruction": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep your head still. Slowly trace a big circle with your eyes, clockwise."
+          }
+        }
+      }
+    },
+    "exercise.palming.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Palming"
+          }
+        }
+      }
+    },
+    "exercise.palming.instruction": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rub your palms together to warm them. Cup them gently over your closed eyes, without pressing."
+          }
+        }
+      }
+    },
+    "exercise.walk.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stand up and walk"
+          }
+        }
+      }
+    },
+    "exercise.walk.instruction": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stand up, stretch and walk around."
+          }
+        }
+      }
+    },
+    "exercise.eyes-closed-rest.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close your eyes"
+          }
+        }
+      }
+    },
+    "exercise.eyes-closed-rest.instruction": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rest with your eyes gently closed."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

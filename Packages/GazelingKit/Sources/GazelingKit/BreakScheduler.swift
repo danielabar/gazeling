@@ -84,6 +84,13 @@ public struct BreakScheduler: Sendable {
     return state
   }
 
+  /// Starts a break immediately (debug menu, launch arguments). Does nothing if paused or the kind is unavailable.
+  public mutating func startBreak(_ kind: BreakKind, now: Date) {
+    guard availableKinds.contains(kind) else { return }
+    if case .paused = state { return }
+    state = .onBreak(kind: kind, endsAt: now.addingTimeInterval(settings.breakDuration(for: kind)))
+  }
+
   /// Cancels the current or upcoming break and restarts the timer for its kind.
   public mutating func skip(now: Date) {
     let kind: BreakKind
@@ -124,7 +131,7 @@ public struct BreakScheduler: Sendable {
 
   /// The long break replaces a short one that would fall within half a short interval before it.
   /// Otherwise a short break could end just before the long one starts.
-  private func nextBreak() -> (kind: BreakKind, due: Date)? {
+  public func nextBreak() -> (kind: BreakKind, due: Date)? {
     let shortOn = availableKinds.contains(.short)
     let longOn = availableKinds.contains(.long)
     let shortFirst =
