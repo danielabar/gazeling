@@ -9,13 +9,13 @@ final class OverlayWindowPresenter: OverlayPresenter {
     private var windows: [NSWindow] = []
     private var current: (session: BreakSession, onSkip: @MainActor () -> Void)?
     private var screenObserver: NSObjectProtocol?
+    private var keyMonitor: Any?
 
-    private final class OverlayWindow: NSWindow {
-        var onEscape: (() -> Void)?
+    /// A non-activating panel can receive key presses without Gazeling becoming the active app.
+    /// That matters because a break starts while another app is in front, and macOS does not let
+    /// a background app take over activation, so Esc would do nothing until the user clicked.
+    private final class OverlayWindow: NSPanel {
         override var canBecomeKey: Bool { true }
-        override func keyDown(with event: NSEvent) {
-            if event.keyCode == 53 { onEscape?() } else { super.keyDown(with: event) }
-        }
     }
 
     func show(session: BreakSession, onSkip: @escaping @MainActor () -> Void) {
@@ -25,10 +25,18 @@ final class OverlayWindowPresenter: OverlayPresenter {
         ) { [weak self] _ in
             MainActor.assumeIsolated { self?.rebuild() }
         }
+        // The SwiftUI content can swallow key presses before the window sees them, so watch Esc app-wide.
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            guard event.keyCode == 53 else { return event }
+            onSkip()
+            return nil
+        }
         rebuild()
     }
 
     func hide() {
+        if let keyMonitor { NSEvent.removeMonitor(keyMonitor) }
+        keyMonitor = nil
         if let screenObserver { NotificationCenter.default.removeObserver(screenObserver) }
         screenObserver = nil
         current = nil
@@ -44,24 +52,33 @@ final class OverlayWindowPresenter: OverlayPresenter {
         closeWindows()
         guard let (session, onSkip) = current else { return }
         let contentScreen = screenWithPointer()
+        var contentWindow: NSWindow?
         for screen in NSScreen.screens {
             // No `screen:` argument: it would make the frame relative to that screen.
             let window = OverlayWindow(
-                contentRect: .zero, styleMask: .borderless, backing: .buffered, defer: false)
+                contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
             window.setFrame(screen.frame, display: true)
             window.level = .screenSaver
             window.backgroundColor = NSColor.black.withAlphaComponent(0.75)
             window.isOpaque = false
             window.hasShadow = false
             window.isReleasedWhenClosed = false
+            // Panels hide when their app is inactive by default, and Gazeling is inactive during a break.
+            window.hidesOnDeactivate = false
             window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
-            window.onEscape = { onSkip() }
             if screen == contentScreen {
-                window.contentView = NSHostingView(rootView: BreakOverlayView(session: session, onSkip: onSkip))
+                let host = NSHostingView(rootView: BreakOverlayView(session: session, onSkip: onSkip))
+                // By default the hosting view resizes the window to fit the SwiftUI content.
+                host.sizingOptions = []
+                window.contentView = host
+                window.setFrame(screen.frame, display: true)
             }
-            window.makeKeyAndOrderFront(nil)
+            window.orderFrontRegardless()
             windows.append(window)
+            if screen == contentScreen { contentWindow = window }
         }
+        // Make the window with the break content key last, so it receives key presses.
+        contentWindow?.makeKey()
         NSApp.activate()
     }
 

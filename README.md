@@ -7,9 +7,10 @@ Status: early development. See `docs/planning/plan.md`.
 ## Build and test
 
 ```sh
-scripts/test.sh   # unit tests
-scripts/build.sh  # build the app
-scripts/run.sh    # build and launch
+make test   # unit tests
+make build  # build the app
+make run    # build and launch
+make help   # all commands
 ```
 
 Needs Xcode and XcodeGen (`brew install xcodegen`).

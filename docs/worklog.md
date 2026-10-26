@@ -4,7 +4,7 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Current status
 
-- **Phase:** 3 (working breaks with placeholder character), code written, **waiting for the user to verify on screen**. Phases 0 to 2 complete.
+- **Phase:** 4 (the owl), starting. Phases 0 to 3 complete (Phase 3 verified by the user on a laptop-only setup).
 - **Last updated:** 2026-10-26.
 
 ## Phase checklist (from plan.md section 6)
@@ -12,7 +12,7 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 - [x] Phase 0: scaffold
 - [x] Phase 1: platform spikes (overlay, notification, idle/sleep-wake, all with App Sandbox on). Findings in `docs/architecture.md`.
 - [x] Phase 2: domain core (rules in `docs/architecture.md`, 47 tests)
-- [ ] Phase 3: working breaks with placeholder character
+- [x] Phase 3: working breaks with placeholder character (verified on laptop screen only; see leftovers under Next)
 - [ ] Phase 4: the owl
 - [ ] Phase 5: settings and polish
 - [ ] Phase 6: sound and voice
@@ -20,6 +20,7 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Done
 
+- Phase 3 verified by the user on the laptop screen: heads-up notification, dim, exercise text and countdown, sounds, Esc and Skip, pause/postpone/skip menu. Three overlay bugs found and fixed during manual testing (see Challenges). `make` targets added (`make demo` for a break within 30 s).
 - Phase 3 code: `AppState` and `BreakSession` and the adapter protocols in `GazelingKit` (59 tests, fakes for every adapter); real adapters in `App/Adapters`, `App/Overlay`; menu in `App/Views/MenuContent.swift`; debug launch arguments in `App/DebugOptions.swift`; `App/Resources/Localizable.xcstrings`. `App/Spikes` deleted. Agent verified: tests pass, app builds, app runs 30 s with short debug intervals without crashing. The agent cannot see the screen, so the overlay, sounds and notification flow are unverified.
 - Phase 2: `Exercise`, `ExerciseCatalog`, `exercises.json`, `Settings` + stores, `ExercisePicker`, `BreakPlan`, `BreakScheduler`, all test-first with no real clock. App still builds under Swift 6.
 - Phase 1: all spikes verified (see Phase 1 notes and `docs/architecture.md`).
@@ -29,7 +30,9 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Next
 
-- Phase 3 remaining: user verifies on screen the cycle heads-up, dim, exercise text and countdown, end chime, resume, on the laptop screen (dual display not testable yet: also test monitor plug in/out and launch-at-login). Original scope was: replace `App/Spikes` with real adapters (overlay, notifier, idle monitor, sound) behind protocols. Add `AppState` and `BreakSession` view models: poll `BreakScheduler.update` about once a second, diff the state to trigger heads-up, overlay and chime. Add debug launch arguments and a menu item to start a break now. Localization keys in `exercises.json` need entries in `Localizable.xcstrings` (not created yet).
+- Phase 4: draw the owl (see plan.md, Owl artwork). First a static pose sheet for the user to approve, then animation. Use `make demo` to test a break by hand.
+
+- Phase 3 leftovers (need the external monitor): monitor plugged in or out mid-break, dimming on a second screen with the new panel window, launch-at-login in the sandbox.
 - Untested in Phase 1 (do during Phase 3): monitor plugged in/out mid-break, launch-at-login in the sandbox.
 - Personal Team signing not needed so far (ad-hoc signing works for notifications and idle).
 
@@ -50,6 +53,13 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Challenges and findings
 
+- **Overlay bugs found in manual testing** (all fixed, see `App/Overlay/OverlayWindowPresenter.swift`):
+  1. An `NSHostingView` as the window's content view resizes the window to the SwiftUI content, so the dim covered only part of the screen. Fix: `host.sizingOptions = []`, then `setFrame(screen.frame)`.
+  2. SwiftUI content swallows Esc before the window sees it. Fix: `NSEvent.addLocalMonitorForEvents` for the duration of the break.
+  3. A break starts while another app is frontmost, and macOS will not let a background app activate, so Esc needed a click. Fix: the overlay is an `NSPanel` with `.nonactivatingPanel`, which can be key without activating the app. Panels also hide on deactivate by default, so `hidesOnDeactivate = false` is required (without it the break ran but nothing showed).
+  The Phase 1 spike missed 2 and 3 because it was started from the menu, which had already activated the app. Always test overlay behaviour with a timer-triggered break (`make demo`).
+- `open` right after `pkill` can fail with LaunchServices error -600; `scripts/demo.sh` sleeps 1 s between them.
+- The agent cannot see the screen or send key presses, so every visual or keyboard behaviour needs the user to confirm.
 - A test that skipped polling for 5 minutes tripped the clock-jump rule (gap > 60 s counts as sleep). Tests must poll like the app. The app must poll about once a second while awake.
 - `print` output vanishes when the app is launched from the menu or `open`. Spikes now use `os.Logger` (see `docs/development.md`). No `logs/` dir: the sandboxed app cannot write into the project folder.
 - `NSWindow(contentRect:..., screen:)` treats contentRect as relative to that screen, so the overlay landed offset on the second monitor. Fixed by creating the window without `screen:` and calling `setFrame(screen.frame)`. Needs re-check by the user.

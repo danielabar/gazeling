@@ -2,10 +2,15 @@
 
 ## Build, test, run
 
+`make` has short names for the scripts. Run `make help` to list them.
+
 ```sh
-scripts/test.sh   # GazelingKit unit tests
-scripts/build.sh  # generate the Xcode project and build
-scripts/run.sh    # build and launch
+make test    # scripts/test.sh: GazelingKit unit tests
+make build   # scripts/build.sh: generate the Xcode project and build
+make run     # scripts/run.sh: build and launch
+make demo    # scripts/demo.sh: build and launch with short timers (break within 30 s)
+make stop    # quit the running app
+make logs    # app log from the last 5 minutes
 ```
 
 ## Logs

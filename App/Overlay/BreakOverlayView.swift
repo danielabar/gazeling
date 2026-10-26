@@ -27,5 +27,6 @@ struct BreakOverlayView: View {
         }
         .foregroundStyle(.white)
         .padding(48)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
