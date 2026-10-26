@@ -1,0 +1,83 @@
+[
+  {
+    "id": "blink",
+    "titleKey": "exercise.blink.title",
+    "instructionKey": "exercise.blink.instruction",
+    "durationSeconds": 20,
+    "defaultBreakKinds": ["short", "long"],
+    "includedInEveryLongBreak": true,
+    "animationScript": "blink"
+  },
+  {
+    "id": "look-far",
+    "titleKey": "exercise.look-far.title",
+    "instructionKey": "exercise.look-far.instruction",
+    "durationSeconds": 20,
+    "defaultBreakKinds": ["short", "long"],
+    "includedInEveryLongBreak": true,
+    "animationScript": "look-far"
+  },
+  {
+    "id": "side-to-side",
+    "titleKey": "exercise.side-to-side.title",
+    "instructionKey": "exercise.side-to-side.instruction",
+    "durationSeconds": 20,
+    "defaultBreakKinds": ["short", "long"],
+    "includedInEveryLongBreak": false,
+    "animationScript": "side-to-side"
+  },
+  {
+    "id": "up-down",
+    "titleKey": "exercise.up-down.title",
+    "instructionKey": "exercise.up-down.instruction",
+    "durationSeconds": 20,
+    "defaultBreakKinds": ["short", "long"],
+    "includedInEveryLongBreak": false,
+    "animationScript": "up-down"
+  },
+  {
+    "id": "circle-left",
+    "titleKey": "exercise.circle-left.title",
+    "instructionKey": "exercise.circle-left.instruction",
+    "durationSeconds": 20,
+    "defaultBreakKinds": ["short", "long"],
+    "includedInEveryLongBreak": false,
+    "animationScript": "circle-left"
+  },
+  {
+    "id": "circle-right",
+    "titleKey": "exercise.circle-right.title",
+    "instructionKey": "exercise.circle-right.instruction",
+    "durationSeconds": 20,
+    "defaultBreakKinds": ["short", "long"],
+    "includedInEveryLongBreak": false,
+    "animationScript": "circle-right"
+  },
+  {
+    "id": "palming",
+    "titleKey": "exercise.palming.title",
+    "instructionKey": "exercise.palming.instruction",
+    "durationSeconds": 30,
+    "defaultBreakKinds": ["short", "long"],
+    "includedInEveryLongBreak": false,
+    "animationScript": "palming"
+  },
+  {
+    "id": "walk",
+    "titleKey": "exercise.walk.title",
+    "instructionKey": "exercise.walk.instruction",
+    "durationSeconds": 60,
+    "defaultBreakKinds": ["long"],
+    "includedInEveryLongBreak": true,
+    "animationScript": "walk"
+  },
+  {
+    "id": "eyes-closed-rest",
+    "titleKey": "exercise.eyes-closed-rest.title",
+    "instructionKey": "exercise.eyes-closed-rest.instruction",
+    "durationSeconds": 20,
+    "defaultBreakKinds": ["long"],
+    "includedInEveryLongBreak": false,
+    "animationScript": "eyes-closed-rest"
+  }
+]

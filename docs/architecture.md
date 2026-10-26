@@ -24,3 +24,25 @@ Not yet tested: plugging a monitor in or out mid-break, Spaces switching during 
 ## Code layout
 
 Spike code in `App/Spikes/Spikes.swift` is throwaway. Phase 3 replaces it with the adapters described in the plan.
+
+## Domain rules (Phase 2, `Packages/GazelingKit`)
+
+All of this is plain Swift with no UI imports. `scripts/test.sh` runs the tests (47 at the end of Phase 2).
+
+**Exercises.** `exercises.json` lives in the package (`Sources/GazelingKit/Resources/`) so `swift test` checks the shipped file. It holds localization keys, a nominal duration, default break kinds (`short`, `long`), `includedInEveryLongBreak` and an animation script id. Defaults: everything is both short and long, except `walk` and `eyes-closed-rest` (long only). `blink`, `look-far` and `walk` are in every long break.
+
+**Settings.** Defaults from `research.md`, plus postpone 5 min. Decoding uses `decodeIfPresent` per key, so a field added later never wipes saved settings. Exercises are excluded through `disabledExerciseIDs`. `breakKindOverrides` changes an exercise's break kinds.
+
+**Exercise choice.** `ExercisePicker.availableKinds`: a break kind is available only if it has at least one enabled exercise (long also needs `longBreaksEnabled`). Unavailable kinds never fire. Short breaks: one exercise, round-robin in catalog order (a pool of one may repeat). Long breaks: required exercises first, then the rest, cycling through the pool. Each fits whole into the time; leftover seconds go to the last step, so step durations sum exactly to the break length.
+
+**Scheduler** (`BreakScheduler`) has no timers. The app calls `update(now:idleSeconds:)` about once a second.
+- States: `working`, `headsUp(kind, startsAt)`, `onBreak(kind, endsAt)`, `paused(until)`.
+- Timers restart when a break **ends** (or is skipped). A short break restarts the short timer; a long break restarts both.
+- A long break replaces a short break that would fall within half a short interval before it (so a short break never ends just before a long one starts).
+- Idle in `working`: idle >= short break length restarts the short timer; idle >= long break length restarts both.
+- Idle during a break is ignored. Idle for a full break length during the heads-up counts as the break taken.
+- Clock jump: if two updates are more than 60 s apart (Mac slept), the gap counts as idle. Waking never starts a break. The app must therefore poll often while awake.
+- Skip restarts the timer for that break's kind. Postpone (only from the heads-up) pushes that kind's due time by `postponeDuration`. Pause and resume restart both timers.
+- `apply(settings:availableKinds:now:)` restarts timers when settings change.
+
+The scheduler returns state only. The app (Phase 3) diffs the state to trigger the notification, overlay and sound.

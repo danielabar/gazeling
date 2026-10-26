@@ -4,14 +4,14 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Current status
 
-- **Phase:** 2 (domain core), not started. Phase 1 complete.
+- **Phase:** 3 (working breaks with placeholder character), not started. Phases 0 to 2 complete.
 - **Last updated:** 2026-10-26.
 
 ## Phase checklist (from plan.md section 6)
 
 - [x] Phase 0: scaffold
 - [x] Phase 1: platform spikes (overlay, notification, idle/sleep-wake, all with App Sandbox on). Findings in `docs/architecture.md`.
-- [ ] Phase 2: domain core
+- [x] Phase 2: domain core (rules in `docs/architecture.md`, 47 tests)
 - [ ] Phase 3: working breaks with placeholder character
 - [ ] Phase 4: the owl
 - [ ] Phase 5: settings and polish
@@ -20,6 +20,7 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Done
 
+- Phase 2: `Exercise`, `ExerciseCatalog`, `exercises.json`, `Settings` + stores, `ExercisePicker`, `BreakPlan`, `BreakScheduler`, all test-first with no real clock. App still builds under Swift 6.
 - Phase 1: all spikes verified (see Phase 1 notes and `docs/architecture.md`).
 - Phase 0: `project.yml` (XcodeGen), `GazelingKit` package with one test, menu bar app with Quit item, `scripts/{build,test,run}.sh`, LICENSE, README, `.gitignore`. XcodeGen 2.46.0 installed via Homebrew with user approval. Verified: tests pass, build succeeds, app launches as background-only (no Dock icon).
 
@@ -27,7 +28,7 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Next
 
-- Phase 2: domain core in `GazelingKit`, test-first: `Exercise`/`ExerciseCatalog`/`exercises.json`, `Settings` defaults from `research.md`, `ExercisePicker`, `BreakScheduler` with a fake clock.
+- Phase 3: replace `App/Spikes` with real adapters (overlay, notifier, idle monitor, sound) behind protocols. Add `AppState` and `BreakSession` view models: poll `BreakScheduler.update` about once a second, diff the state to trigger heads-up, overlay and chime. Add debug launch arguments and a menu item to start a break now. Localization keys in `exercises.json` need entries in `Localizable.xcstrings` (not created yet).
 - Untested in Phase 1 (do during Phase 3): monitor plugged in/out mid-break, launch-at-login in the sandbox.
 - Personal Team signing not needed so far (ad-hoc signing works for notifications and idle).
 
@@ -38,8 +39,13 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 - `scripts/test.sh` runs only the `GazelingKit` package tests. No `AppTests` target yet.
 - LICENSE copyright holder "Daniela Baron" was guessed. Ask the user to confirm.
 
+- `exercises.json` is in the package (`Packages/GazelingKit/Sources/GazelingKit/Resources/`), not `App/Resources/` as the plan's layout says, so `swift test` can validate the shipped file.
+- Product decisions made with the user in Phase 2: blink is in the short-break rotation and always in long breaks (not in every short break, since a 20 s break fits one exercise); all eye-movement exercises and palming are tagged short and long, `walk` and `eyes-closed-rest` long only; postpone is 5 minutes; skip restarts the full interval.
+- Long-break plan rule: leftover seconds extend the last step, instead of an eyes-closed rest filler step.
+
 ## Challenges and findings
 
+- A test that skipped polling for 5 minutes tripped the clock-jump rule (gap > 60 s counts as sleep). Tests must poll like the app. The app must poll about once a second while awake.
 - `print` output vanishes when the app is launched from the menu or `open`. Spikes now use `os.Logger` (see `docs/development.md`). No `logs/` dir: the sandboxed app cannot write into the project folder.
 - `NSWindow(contentRect:..., screen:)` treats contentRect as relative to that screen, so the overlay landed offset on the second monitor. Fixed by creating the window without `screen:` and calling `setFrame(screen.frame)`. Needs re-check by the user.
 - Notification authorization status is already **denied (1)** before any request, so macOS will not show the prompt again. Probably recorded when the app was launched from the terminal during testing, or a prompt timed out unseen. Fix is in System Settings > Notifications (user step).
