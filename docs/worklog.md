@@ -4,7 +4,7 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Current status
 
-- **Phase:** 4 (the owl): drawn, animated for all 9 exercises, committed (`cbe02ee`). Waiting for the user's remaining animation feedback. Phases 0 to 3 complete.
+- **Phase:** 5 (settings and polish), just starting. Phases 0 to 4 complete.
 - **Last updated:** 2026-10-26.
 
 ## Phase checklist (from plan.md section 6)
@@ -13,10 +13,11 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 - [x] Phase 1: platform spikes (overlay, notification, idle/sleep-wake, all with App Sandbox on). Findings in `docs/architecture.md`.
 - [x] Phase 2: domain core (rules in `docs/architecture.md`, 47 tests)
 - [x] Phase 3: working breaks with placeholder character (verified on laptop screen only; see leftovers under Next)
-- [ ] Phase 4: the owl
+- [x] Phase 4: the owl (drawn, animated for all 9 exercises, reviewed by the user; images in `docs/images/`; rules in `docs/architecture.md`)
 - [ ] Phase 5: settings and polish
 - [ ] Phase 6: sound and voice
 - [ ] Phase 7: docs and release
+- [ ] Phase 9: branding (app icon from the Dusk owl, menu bar icon, README and GitHub images, tagline). Added at the user's request; the user is not a designer, so the agent proposes and the user picks. Scope in `docs/planning/plan.md` section 6. Can be done any time before release.
 - [ ] Phase 8 (optional, after 5 and 6): user-chosen break sounds from the system sound list. Added at the user's request; scope in `docs/planning/plan.md` section 6.
 
 ## Done
@@ -36,15 +37,16 @@ Living status document. **Future agents: read this first, after `CLAUDE.md`.** U
 
 ## Next
 
-1. **Phase 4, finish:** the user is reviewing the animations with `make inspect` (Debug menu, play any exercise) and will send feedback. Apply it, then finish: screenshots of each animation into `docs/`, and check the owl size on a larger external monitor when available (`OwlSize` in `App/Overlay/BreakOverlayView.swift`). If the user dislikes the look-far window scene, option B is a second owl drawn in profile (needs a new pose sheet and approval).
-2. **Reduce Motion** is deliberately not honoured yet (the user wants full animation for testing). Add it before release (plan.md section 2): `\.accessibilityReduceMotion` in `AnimatedOwlView`, with simple fades and held poses.
-3. **Phase 5** (settings window, first-run setup, icons, launch at login, VoiceOver) is next after Phase 4.
-4. **Needs the external monitor (Phase 3 leftovers):** monitor plugged in or out mid-break, dimming on a second screen with the panel window, launch-at-login in the sandbox.
-5. Not built: Skip and Postpone buttons on the heads-up notification itself (they are in the menu).
-6. Personal Team signing is not needed so far (ad-hoc signing works for notifications and idle).
+1. **Phase 5: settings and polish** (plan.md section 6). Order of work: settings window (breaks, exercises, which screen shows the owl, launch at login), first-run onboarding, reopen-from-Applications shows settings, native look, VoiceOver and keyboard pass.
+2. **Needs the external monitor (Phase 3 leftovers):** monitor plugged in or out mid-break, dimming on a second screen with the panel window, launch-at-login in the sandbox. Check the owl size on a larger display too (`OwlSize` in `App/Overlay/BreakOverlayView.swift`).
+3. Not built: Skip and Postpone buttons on the heads-up notification itself (they are in the menu).
+4. Phase 9 (branding) and Phase 8 (optional custom sounds) are captured in plan.md.
+5. Personal Team signing is not needed so far (ad-hoc signing works for notifications and idle).
 
 ## Deviations from the plan
 
+- **Reduce Motion is not supported** (product owner's decision, 2026-10-26; the owl always plays the full animation). Revisit if a user asks.
+- Menu bar icon and app icon moved from Phase 5 to the new Phase 9 (branding). The menu uses the system `eye` symbol until then.
 - Eye shine highlights move with the iris. The plan (Owl artwork table) said they stay fixed relative to the eye, but the user found a static highlight over a moving pupil looked wrong.
 - The owl lives in a second package target, `GazelingCharacters` (SwiftUI), not in `App/Characters/`. Reason: it can be rendered and tested from the command line (`make pose-sheet`), and `GazelingKit` stays Foundation-only. The app will link it through `project.yml`.
 - `.swift-format` sets 4-space indentation (the default is 2); the whole codebase was reformatted once.

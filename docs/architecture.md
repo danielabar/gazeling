@@ -46,3 +46,15 @@ All of this is plain Swift with no UI imports. `scripts/test.sh` runs the tests 
 - `apply(settings:availableKinds:now:)` restarts timers when settings change.
 
 The scheduler returns state only. The app (Phase 3) diffs the state to trigger the notification, overlay and sound.
+
+## The owl (Phase 4, `Packages/GazelingKit/Sources/GazelingCharacters`)
+
+Review images are in `docs/images/`: `owl-pose-sheet.png` (poses and palettes), `owl-animation-strips.png` (frames of every exercise animation) and `owl-window-scene.png`. Regenerate them with `make pose-sheet`, `make animation-strips` or `swift run --package-path Packages/GazelingKit PoseSheet sheet|strips|scene <out.png>`.
+
+- **Drawing.** `OwlView` draws the owl from separate parts in a fixed 200 x 240 space, scaled to fit. Back to front: feet, body, head (ear tufts, face, eyes, lids, brows, beak), wings. The look is the Dusk palette (indigo owl, amber eyes), chosen by the product owner. `OwlPalette` also has Honey and Mist, unused.
+- **Pose.** `OwlPose` is a struct of plain `Double`s (gaze x and y, eyelid, smile, brow, head tilt, each wing, wing cover, bounce, feet, breathe), so poses can be blended with `blended(with:_:)`.
+- **Animation.** `OwlAnimation.pose(script:at:duration:)` is a pure function of time, so it is unit tested and can be rendered to still frames. Each exercise names its script in `exercises.json` (`animationScript`); a test checks every exercise has one. Each step eases in from, and back out to, neutral over 0.5 s. Idle breathing, head sway and occasional blinks are added on top. In the last 2.2 s of every break the owl waves goodbye.
+- **Playback.** `AnimatedOwlView` uses `TimelineView(.animation)` and the step's start time from `BreakSession.stepStartedAt`. `BreakOverlayView` sizes the owl at 30% of the screen height, clamped to 240 to 360 pt (`OwlSize`).
+- **Scene.** `look-far` also shows `WindowSceneView` beside the owl (sky, drifting clouds, sun, hills, trees), chosen through `OwlAnimation.scene(for:)`. The first version, a front-facing owl staring into space, felt creepy to the product owner. The fallback if the window is disliked is a profile owl.
+- **Design decisions.** Eye shine moves with the iris (not fixed to the eye as first planned). Reduce Motion is deliberately not supported. Wings cover the eyes by sweeping inward across the chest (the outward route made the wings fling wide).
+- **Debug.** Debug builds have a "Debug: play exercise" menu. `make inspect` starts with no automatic breaks.

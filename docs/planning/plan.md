@@ -71,7 +71,7 @@ Rules:
 
 - The owl is drawn from SwiftUI vector shapes (`Shape`, `Canvas`), so eyes, pupils and eyelids animate independently.
 - Each exercise names an **animation script**: a short sequence of poses (for example "pupils to far left, hold, far right, hold"). The character renders whatever pose it is given. This keeps exercises and characters independent: a new character implements `Character`, a new exercise adds a script.
-- Respect **Reduce Motion** (System Settings → Accessibility): fall back to simple fades.
+- **Reduce Motion is not honoured.** Decided 2026-10-26 by the product owner: the owl always plays the full animation. Revisit if a user asks (the hook would be `\.accessibilityReduceMotion` in `AnimatedOwlView`).
 - v1 characters are compiled in. A runtime plugin system is not built; the `Character` protocol keeps the door open.
 
 ### Owl artwork
@@ -270,13 +270,13 @@ Each phase ends with a verifiable check.
 
 **Phase 4: The owl**
 1. Draw the owl in SwiftUI as independently animatable parts (see Owl artwork). First produce a static pose sheet for your approval, then implement poses, idle behaviours and the animation scripts for every exercise in the set.
-2. Reduce Motion fallback. Use Xcode previews to iterate.
+2. ~~Reduce Motion fallback~~ Skipped by decision (see section 2). Iterate with `make pose-sheet`, `make animation-strips` and `make inspect`.
 - *Verify:* each exercise's animation reviewed on screen by you; screenshots saved in `docs/`.
 
 **Phase 5: Settings and polish**
 1. Settings window: intervals, durations, per-exercise on/off and break tags, display choice, sounds, launch at login.
 2. First-run onboarding: notification permission, launch-at-login choice.
-3. Menu bar template icon, app icon, native look (system fonts, materials, standard controls).
+3. Native look (system fonts, materials, standard controls). The menu bar icon and app icon moved to Phase 9 (branding); until then the menu uses the system `eye` symbol.
 4. Reopen-from-Applications shows the settings window.
 - *Verify:* every setting changes behaviour and survives relaunch; a keyboard-only and VoiceOver pass.
 
@@ -298,6 +298,15 @@ Added 2026-10-26 at the product owner's request. Not needed for v1; do after Pha
 3. Open question: letting users pick their own audio file needs the `com.apple.security.files.user-selected.read-only` sandbox entitlement and a file picker. Decide then whether it is worth it; the system-sound list may be enough.
 - *Verify:* each choice plays at the right moment, "none" is silent, the preview works, and the choice survives relaunch. Confirm that system sounds play inside the App Sandbox (the placeholder Tink and Glass already do).
 
+**Phase 9: branding (do any time after Phase 4; before the public release)**
+Added 2026-10-26 at the product owner's request. They are not a designer or marketer, so this phase starts with proposals from the agent and the product owner picks. Nothing is decided yet.
+1. **App icon**, based on the purple Dusk owl. Needs the full set of sizes (16 to 1024 px) in `Assets.xcassets`. It also appears in notifications (macOS uses the app icon there) and in Finder and the About screen.
+2. **Menu bar icon:** a monochrome template image (simple owl or eye silhouette) that works in light and dark menu bars, replacing the system `eye` symbol.
+3. **README and GitHub presence:** a header image, a short description and tagline, screenshots or a short screen recording of a break, and a social preview image for the repository.
+4. **Release assets:** screenshots for the GitHub Release page. Optionally a simple landing page.
+5. Decide the look (flat owl face only versus full body, background colour for the app icon) and the tagline. The name Gazeling is already decided; trademark check is still open (section "Open decisions").
+- *Verify:* the icon looks right at 16 px and 1024 px, in light and dark mode, and in a notification; the README renders well on GitHub.
+
 **Later:** global pause shortcut, additional characters, other languages, voice clips per language, meeting/screen-share detection.
 
 ## 7. Internationalization
@@ -312,7 +321,7 @@ Added 2026-10-26 at the product owner's request. Not needed for v1; do after Pha
 
 - Unit tests for all domain logic. No timers or real clocks in tests.
 - Manual checklist (in `docs/development.md`) for what automation cannot see: dimming across screens, Spaces, full-screen apps, plugging a monitor in and out mid-break.
-- Reduce Motion, VoiceOver labels on controls, and sufficient contrast on the overlay.
+- VoiceOver labels on controls, and sufficient contrast on the overlay. (Reduce Motion is deliberately not supported; see section 2.)
 - Calm defaults: no sound surprises, always a way to skip.
 
 ## Keeping up with new macOS versions
