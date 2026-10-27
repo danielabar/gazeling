@@ -6,6 +6,8 @@ struct SettingsView: View {
 
     var body: some View {
         TabView {
+            GeneralSettingsView(appState: appState)
+                .tabItem { Label("General", systemImage: "gearshape") }
             BreaksSettingsView(appState: appState)
                 .tabItem { Label("Breaks", systemImage: "timer") }
             ExercisesSettingsView(appState: appState)

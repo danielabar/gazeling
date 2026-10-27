@@ -7,7 +7,7 @@ import SwiftUI
 @MainActor
 final class OverlayWindowPresenter: OverlayPresenter {
     private var windows: [NSWindow] = []
-    private var current: (session: BreakSession, onSkip: @MainActor () -> Void)?
+    private var current: (session: BreakSession, screens: OverlayScreen, onSkip: @MainActor () -> Void)?
     private var screenObserver: NSObjectProtocol?
     private var keyMonitor: Any?
 
@@ -18,8 +18,8 @@ final class OverlayWindowPresenter: OverlayPresenter {
         override var canBecomeKey: Bool { true }
     }
 
-    func show(session: BreakSession, onSkip: @escaping @MainActor () -> Void) {
-        current = (session, onSkip)
+    func show(session: BreakSession, contentScreens: OverlayScreen, onSkip: @escaping @MainActor () -> Void) {
+        current = (session, contentScreens, onSkip)
         screenObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
         ) { [weak self] _ in
@@ -50,8 +50,8 @@ final class OverlayWindowPresenter: OverlayPresenter {
 
     private func rebuild() {
         closeWindows()
-        guard let (session, onSkip) = current else { return }
-        let contentScreen = screenWithPointer()
+        guard let (session, screens, onSkip) = current else { return }
+        let contentScreens = screensShowingContent(screens)
         var contentWindow: NSWindow?
         for screen in NSScreen.screens {
             // No `screen:` argument: it would make the frame relative to that screen.
@@ -66,7 +66,7 @@ final class OverlayWindowPresenter: OverlayPresenter {
             // Panels hide when their app is inactive by default, and Gazeling is inactive during a break.
             window.hidesOnDeactivate = false
             window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
-            if screen == contentScreen {
+            if contentScreens.contains(screen) {
                 let host = NSHostingView(rootView: BreakOverlayView(session: session, onSkip: onSkip))
                 // By default the hosting view resizes the window to fit the SwiftUI content.
                 host.sizingOptions = []
@@ -75,11 +75,24 @@ final class OverlayWindowPresenter: OverlayPresenter {
             }
             window.orderFrontRegardless()
             windows.append(window)
-            if screen == contentScreen { contentWindow = window }
+            if contentScreens.contains(screen), contentWindow == nil { contentWindow = window }
         }
         // Make the window with the break content key last, so it receives key presses.
         contentWindow?.makeKey()
         NSApp.activate()
+    }
+
+    /// Every screen is dimmed; these are the ones that also show the owl.
+    private func screensShowingContent(_ choice: OverlayScreen) -> [NSScreen] {
+        switch choice {
+        case .all:
+            return NSScreen.screens
+        case .main:
+            // The first screen is the one with the menu bar. `NSScreen.main` is the one with keyboard focus.
+            return Array(NSScreen.screens.prefix(1))
+        case .pointer:
+            return screenWithPointer().map { [$0] } ?? []
+        }
     }
 
     private func screenWithPointer() -> NSScreen? {

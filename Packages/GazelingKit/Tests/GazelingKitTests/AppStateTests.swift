@@ -16,8 +16,10 @@ private final class Fakes: IdleMonitor, Notifier, OverlayPresenter, SoundPlayer 
         events.append("headsUp:\(kind):\(Int(seconds))")
     }
     func removeHeadsUp() { events.append("removeHeadsUp") }
-    func show(session: BreakSession, onSkip: @escaping @MainActor () -> Void) {
+    var shownOn: OverlayScreen?
+    func show(session: BreakSession, contentScreens: OverlayScreen, onSkip: @escaping @MainActor () -> Void) {
         events.append("show")
+        shownOn = contentScreens
         shownSession = session
         self.onSkip = onSkip
     }
@@ -283,4 +285,16 @@ private final class Harness {
     #expect(h.app.settings.shortBreakInterval == Settings().shortBreakInterval)
     #expect(h.app.settings.disabledExerciseIDs == ["palming"])
     #expect(h.app.nextBreakDate == h.now.addingTimeInterval(20 * 60))
+}
+
+@Test @MainActor func theOverlayIsShownOnTheChosenScreens() {
+    let h = Harness()
+    h.app.startBreakNow(.short)
+    #expect(h.fakes.shownOn == .pointer)
+    h.app.skipCurrentBreak()
+    var s = h.app.settings
+    s.overlayScreen = .all
+    h.app.apply(settings: s)
+    h.app.startBreakNow(.short)
+    #expect(h.fakes.shownOn == .all)
 }

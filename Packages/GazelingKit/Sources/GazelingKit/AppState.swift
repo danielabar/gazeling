@@ -188,7 +188,9 @@ public final class AppState {
         }
         let session = BreakSession(plan: plan, startedAt: now)
         self.session = session
-        overlay.show(session: session, onSkip: { [weak self] in self?.skipCurrentBreak() })
+        overlay.show(
+            session: session, contentScreens: settings.overlayScreen,
+            onSkip: { [weak self] in self?.skipCurrentBreak() })
         if settings.soundsEnabled { sound.playBreakStart() }
     }
 

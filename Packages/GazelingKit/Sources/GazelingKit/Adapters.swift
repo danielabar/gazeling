@@ -19,8 +19,9 @@ public protocol Notifier {
 
 @MainActor
 public protocol OverlayPresenter {
-    /// Dims every screen and shows the break. `onSkip` is called when the user presses Skip or Esc.
-    func show(session: BreakSession, onSkip: @escaping @MainActor () -> Void)
+    /// Dims every screen and shows the break on the screens `contentScreens` selects. `onSkip` is
+    /// called when the user presses Skip or Esc.
+    func show(session: BreakSession, contentScreens: OverlayScreen, onSkip: @escaping @MainActor () -> Void)
     func hide()
 }
 
