@@ -13,7 +13,7 @@ struct MenuContent: View {
         case .paused:
             Button("Resume") { appState.resume() }
         case .headsUp:
-            Button("Postpone 5 minutes") { appState.postpone() }
+            Button("Postpone by \(DurationText.format(appState.settings.postponeDuration))") { appState.postpone() }
             Button("Skip this break") { appState.skip() }
         default:
             Button("Skip next break") { appState.skip() }

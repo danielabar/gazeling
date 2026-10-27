@@ -32,7 +32,7 @@ struct BreaksSettingsView: View {
     ) -> some View {
         LabeledContent(title) {
             HStack {
-                Text(Self.format(appState.settings[keyPath: keyPath]))
+                Text(DurationText.format(appState.settings[keyPath: keyPath]))
                     .monospacedDigit()
                     .foregroundStyle(.secondary)
                 Stepper(title, value: appState.binding(keyPath), in: range, step: step)
@@ -41,7 +41,4 @@ struct BreaksSettingsView: View {
         }
     }
 
-    static func format(_ seconds: TimeInterval) -> String {
-        Duration.seconds(seconds).formatted(.units(allowed: [.hours, .minutes, .seconds], width: .wide))
-    }
 }

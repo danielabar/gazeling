@@ -261,3 +261,13 @@ private final class Harness {
     let blink = try #require(h.app.exercises.first { $0.id == "blink" })
     #expect(!h.app.canSwitchOff(blink))
 }
+
+@Test @MainActor func postponeUsesTheConfiguredLength() async {
+    let h = Harness()
+    var s = h.app.settings
+    s.postponeDuration = 10 * 60
+    h.app.apply(settings: s)
+    await h.advance(20 * 60 - 30)
+    h.app.postpone()
+    #expect(h.app.nextBreakDate == h.now.addingTimeInterval(10 * 60))
+}

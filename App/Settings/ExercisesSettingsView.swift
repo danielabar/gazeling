@@ -26,8 +26,8 @@ struct ExercisesSettingsView: View {
 
     private var explanation: some View {
         let s = appState.settings
-        let short = BreaksSettingsView.format(s.shortBreakDuration)
-        let long = BreaksSettingsView.format(s.longBreakDuration)
+        let short = DurationText.format(s.shortBreakDuration)
+        let long = DurationText.format(s.longBreakDuration)
         return VStack(alignment: .leading, spacing: 6) {
             Text("A short break shows one of the exercises below, for \(short).")
             Text("The long break is a walk, for \(long).")
