@@ -53,6 +53,25 @@ public struct Settings: Codable, Sendable, Equatable {
         if enabled { disabledExerciseIDs.remove(exercise.id) } else { disabledExerciseIDs.insert(exercise.id) }
     }
 
+    /// Puts the break timings and the long-breaks switch back to the defaults. Exercise choices and every
+    /// other setting stay as they are.
+    public mutating func restoreDefaultTimings() {
+        let d = Settings()
+        shortBreakInterval = d.shortBreakInterval
+        shortBreakDuration = d.shortBreakDuration
+        longBreaksEnabled = d.longBreaksEnabled
+        longBreakInterval = d.longBreakInterval
+        longBreakDuration = d.longBreakDuration
+        headsUpLead = d.headsUpLead
+        postponeDuration = d.postponeDuration
+    }
+
+    public var hasDefaultTimings: Bool {
+        var restored = self
+        restored.restoreDefaultTimings()
+        return restored == self
+    }
+
     /// The values that decide when breaks happen. Changing any of them restarts the timers.
     struct Timings: Equatable {
         var shortInterval, shortDuration, longInterval, longDuration, headsUp: TimeInterval

@@ -271,3 +271,16 @@ private final class Harness {
     h.app.postpone()
     #expect(h.app.nextBreakDate == h.now.addingTimeInterval(10 * 60))
 }
+
+@Test @MainActor func restoringDefaultTimingsSavesThemAndRestartsTheCountdown() async {
+    let h = Harness()
+    var s = h.app.settings
+    s.shortBreakInterval = 5 * 60
+    s.disabledExerciseIDs = ["palming"]
+    h.app.apply(settings: s)
+    await h.advance(60)
+    h.app.restoreDefaultTimings()
+    #expect(h.app.settings.shortBreakInterval == Settings().shortBreakInterval)
+    #expect(h.app.settings.disabledExerciseIDs == ["palming"])
+    #expect(h.app.nextBreakDate == h.now.addingTimeInterval(20 * 60))
+}

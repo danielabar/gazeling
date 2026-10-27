@@ -105,6 +105,12 @@ public final class AppState {
         forcedPlan = nil
     }
 
+    public func restoreDefaultTimings() {
+        var s = settings
+        s.restoreDefaultTimings()
+        apply(settings: s)
+    }
+
     /// Validates, saves and applies new settings.
     public func apply(settings newSettings: Settings) {
         settings = newSettings.validated()

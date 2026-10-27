@@ -22,6 +22,10 @@ struct BreaksSettingsView: View {
                 row("Notify me before a break", \.headsUpLead, GazelingKit.Settings.headsUpRange, step: 5)
                 row("Postpone by", \.postponeDuration, GazelingKit.Settings.postponeRange, step: 60)
             }
+            Section {
+                Button("Restore default timings") { appState.restoreDefaultTimings() }
+                    .disabled(appState.settings.hasDefaultTimings)
+            }
         }
         .formStyle(.grouped)
     }

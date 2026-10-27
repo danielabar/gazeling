@@ -154,3 +154,28 @@ private func exercise(_ id: String) -> Exercise {
     store.save(s)
     #expect(store.load() == s)
 }
+
+// MARK: Restore defaults
+
+@Test func restoringDefaultTimingsLeavesEverythingElseAlone() {
+    var s = fullyCustomised()
+    s.restoreDefaultTimings()
+    let d = Settings()
+    #expect(s.shortBreakInterval == d.shortBreakInterval && s.shortBreakDuration == d.shortBreakDuration)
+    #expect(s.longBreaksEnabled == d.longBreaksEnabled)
+    #expect(s.longBreakInterval == d.longBreakInterval && s.longBreakDuration == d.longBreakDuration)
+    #expect(s.headsUpLead == d.headsUpLead && s.postponeDuration == d.postponeDuration)
+    // Not timings: these keep the customised values.
+    #expect(s.disabledExerciseIDs == ["walk"])
+    #expect(s.overlayScreen == .all)
+    #expect(!s.soundsEnabled)
+}
+
+@Test func hasDefaultTimingsIsTrueOnlyWhenTimingsAreDefault() {
+    #expect(Settings().hasDefaultTimings)
+    var s = Settings()
+    s.disabledExerciseIDs = ["walk"]
+    #expect(s.hasDefaultTimings)
+    s.headsUpLead = 45
+    #expect(!s.hasDefaultTimings)
+}
