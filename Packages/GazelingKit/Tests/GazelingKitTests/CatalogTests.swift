@@ -19,15 +19,20 @@ import Testing
     for e in exercises {
         #expect(!e.titleKey.isEmpty && !e.instructionKey.isEmpty && !e.animationScript.isEmpty)
         #expect(e.durationSeconds > 0)
-        #expect(!e.defaultBreakKinds.isEmpty)
     }
+}
+
+@Test func onlyStandUpAndWalkIsALongBreak() throws {
+    let exercises = try ExerciseCatalog.bundled().exercises
+    #expect(exercises.filter { $0.breakKind == .long }.map(\.id) == ["walk"])
+    #expect(exercises.filter { $0.breakKind == .short }.count == 8)
 }
 
 @Test func catalogDecodesFromData() throws {
     let json = """
         [{"id":"x","titleKey":"t","instructionKey":"i","durationSeconds":5,
-          "defaultBreakKinds":["short"],"includedInEveryLongBreak":false,"animationScript":"x"}]
+          "breakKind":"long","animationScript":"x"}]
         """
     let catalog = try ExerciseCatalog(data: Data(json.utf8))
-    #expect(catalog.exercises.first?.defaultBreakKinds == [.short])
+    #expect(catalog.exercises.first?.breakKind == .long)
 }

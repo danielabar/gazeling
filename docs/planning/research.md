@@ -17,13 +17,13 @@ Decided 2026-10-26, after reviewing the findings below.
 | Exercise | Notes |
 |---|---|
 | Full blink with gentle squeeze | In every break. Best-supported item. About 15 reps. |
-| Look far away / out the window | Short and long breaks. |
+| Look far away / out the window | Short breaks. |
 | Eyes side to side | |
 | Eyes up and down | |
 | Eyes around, left | |
 | Eyes around, right | |
 | Palming (cup hands over closed eyes) | |
-| Stand up and walk | Long break. |
+| Stand up and walk | The long break. |
 | Eyes-closed rest (about 15–20 s) | Optional filler. |
 
 Exercises are configuration data, so more can be added later.
@@ -46,7 +46,7 @@ No trial supports these exact numbers (see [Open questions for the schedule](#op
 | Long break | Every **60 minutes** of computer use, lasting **5 minutes** (replaces that hour's short break) |
 | Heads-up before a break | Gentle notification about **30 seconds** ahead, with Skip and Postpone |
 | Exercise choice, short break | One exercise per break, taken from the enabled short-break exercises in rotation (no immediate repeats) |
-| Exercise choice, long break | A sequence of several exercises across the 5 minutes, including look-far-away, a full-blink set and, if enabled, stand-up-and-walk |
+| Exercise choice, long break | **Stand up and walk, for the whole 5 minutes** (changed 2026-10-26: chaining eye exercises for 5 minutes could make people dizzy) |
 | Away from the computer | If the Mac is idle for at least as long as a break, the timer resets, since the user already rested |
 | Strict mode | Off. Skip and Esc always work. |
 
@@ -54,7 +54,7 @@ No trial supports these exact numbers (see [Open questions for the schedule](#op
 
 - Intervals and durations for short and long breaks, and whether long breaks are on.
 - **Per-exercise on/off.** Any exercise can be excluded, for example someone who cannot walk away from the desk, or finds palming awkward.
-- Per-exercise break type: each exercise is tagged short, long or both by default, and the user can change that.
+- No per-exercise break type. Decided 2026-10-26: "Stand up and walk" is the only long-break exercise and all the others are short-break exercises. The user can only switch an exercise off.
 - If every exercise for a break type is excluded, that break type is turned off and the settings screen says so. It never shows an empty break.
 - Defaults live in the exercise data file, so adding an exercise later needs no code change.
 

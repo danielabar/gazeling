@@ -147,24 +147,13 @@ private final class Harness {
     #expect(store.load() == s)
 }
 
-@Test @MainActor func sessionStepAdvancesThroughALongBreak() async {
+@Test @MainActor func aLongBreakIsOneWalkForTheFullBreak() {
     let h = Harness()
     h.app.startBreakNow(.long)
     let session = h.app.session!
-    #expect(session.plan.steps.count > 1)
-    let first = session.plan.steps[0].seconds
-    await h.advance(Int(first) + 1)
-    #expect(session.stepIndex == 1)
-}
-
-@Test @MainActor func sessionExposesWhenTheCurrentStepStarted() async {
-    let h = Harness()
-    h.app.startBreakNow(.long)
-    let session = h.app.session!
+    #expect(session.plan.steps.map(\.exercise.id) == ["walk"])
+    #expect(session.totalSeconds == 300)
     #expect(session.stepStartedAt == session.startedAt)
-    let first = session.plan.steps[0].seconds
-    await h.advance(Int(first) + 1)
-    #expect(session.stepStartedAt == session.startedAt.addingTimeInterval(first))
 }
 
 @Test @MainActor func playNowShowsThatExerciseForItsOwnLength() async throws {
@@ -243,4 +232,32 @@ private final class Harness {
     app.apply(settings: s)
     #expect(store.load().shortBreakInterval == Settings.shortIntervalRange.lowerBound)
     #expect(app.settings.shortBreakInterval == Settings.shortIntervalRange.lowerBound)
+}
+
+@Test @MainActor func anyExerciseCanBeSwitchedOffWhileOthersRemain() throws {
+    let h = Harness()
+    for exercise in h.app.exercises { #expect(h.app.canSwitchOff(exercise)) }
+    #expect(h.app.canTurnOffLongBreaks)
+}
+
+@Test @MainActor func theLastBreakCannotBeSwitchedOff() throws {
+    let h = Harness()
+    var s = h.app.settings
+    for exercise in h.app.exercises where exercise.breakKind == .short { s.setEnabled(false, for: exercise) }
+    h.app.apply(settings: s)
+    let walk = try #require(h.app.exercises.first { $0.id == "walk" })
+    #expect(!h.app.canSwitchOff(walk))
+    #expect(!h.app.canTurnOffLongBreaks)
+}
+
+@Test @MainActor func theLastShortExerciseCannotBeSwitchedOffWhenLongBreaksAreOff() throws {
+    let h = Harness()
+    var s = h.app.settings
+    s.longBreaksEnabled = false
+    for exercise in h.app.exercises where exercise.breakKind == .short && exercise.id != "blink" {
+        s.setEnabled(false, for: exercise)
+    }
+    h.app.apply(settings: s)
+    let blink = try #require(h.app.exercises.first { $0.id == "blink" })
+    #expect(!h.app.canSwitchOff(blink))
 }

@@ -100,8 +100,8 @@ public final class AppState {
     /// Debug: play one exercise now, ignoring the schedule. Lasts `seconds`, or the exercise's own length.
     public func playNow(exercise: Exercise, seconds: TimeInterval? = nil) {
         let length = seconds ?? exercise.durationSeconds
-        forcedPlan = .short(exercise, seconds: length)
-        perform { $0.startBreak(.short, now: clock(), duration: length) }
+        forcedPlan = .single(exercise, kind: exercise.breakKind, seconds: length)
+        perform { $0.startBreak(exercise.breakKind, now: clock(), duration: length) }
         forcedPlan = nil
     }
 
@@ -114,6 +114,26 @@ public final class AppState {
             $0.apply(
                 settings: effective, availableKinds: picker.availableKinds(settings: effective), now: clock())
         }
+    }
+
+    /// Break kinds that will actually happen: turned on, with at least one enabled exercise.
+    public var availableBreakKinds: Set<BreakKind> {
+        picker.availableKinds(settings: settings)
+    }
+
+    /// False if switching this exercise off would leave no break that could happen. The settings window
+    /// uses this to keep the last break switched on (to stop breaks for a while, the user pauses).
+    public func canSwitchOff(_ exercise: Exercise) -> Bool {
+        var s = settings
+        s.setEnabled(false, for: exercise)
+        return !picker.availableKinds(settings: s).isEmpty
+    }
+
+    /// False if the long break is the only break left, so it cannot be switched off.
+    public var canTurnOffLongBreaks: Bool {
+        var s = settings
+        s.longBreaksEnabled = false
+        return !picker.availableKinds(settings: s).isEmpty
     }
 
     /// When the next break is due, or nil if none is (all exercises off, or paused).

@@ -29,11 +29,11 @@ Spike code in `App/Spikes/Spikes.swift` is throwaway. Phase 3 replaces it with t
 
 All of this is plain Swift with no UI imports. `scripts/test.sh` runs the tests (47 at the end of Phase 2).
 
-**Exercises.** `exercises.json` lives in the package (`Sources/GazelingKit/Resources/`) so `swift test` checks the shipped file. It holds localization keys, a nominal duration, default break kinds (`short`, `long`), `includedInEveryLongBreak` and an animation script id. Defaults: everything is both short and long, except `walk` and `eyes-closed-rest` (long only). `blink`, `look-far` and `walk` are in every long break.
+**Exercises.** `exercises.json` lives in the package (`Sources/GazelingKit/Resources/`) so `swift test` checks the shipped file. It holds localization keys, a nominal duration, a `breakKind` (`short` or `long`) and an animation script id. Only `walk` is `long`; the other eight are `short`. (Originally most exercises could appear in both kinds and long breaks chained several; the product owner changed this on 2026-10-26 because minutes of eye movements could cause dizziness. The chain logic and the per-exercise tag overrides were deleted.)
 
-**Settings.** Defaults from `research.md`, plus postpone 5 min. Decoding uses `decodeIfPresent` per key, so a field added later never wipes saved settings. Exercises are excluded through `disabledExerciseIDs`. `breakKindOverrides` changes an exercise's break kinds.
+**Settings.** Defaults from `research.md`, plus postpone 5 min. Decoding uses `decodeIfPresent` per key, so a field added later never wipes saved settings. Exercises are excluded through `disabledExerciseIDs`; that is the only per-exercise setting.
 
-**Exercise choice.** `ExercisePicker.availableKinds`: a break kind is available only if it has at least one enabled exercise (long also needs `longBreaksEnabled`). Unavailable kinds never fire. Short breaks: one exercise, round-robin in catalog order (a pool of one may repeat). Long breaks: required exercises first, then the rest, cycling through the pool. Each fits whole into the time; leftover seconds go to the last step, so step durations sum exactly to the break length.
+**Exercise choice.** `ExercisePicker.availableKinds`: a break kind is available only if it has at least one enabled exercise (long also needs `longBreaksEnabled`). Unavailable kinds never fire. Each break is one exercise, round-robin in catalog order within its kind (a pool of one repeats), stretched to the break's duration. The long break is therefore always the walk, for the full long-break duration.
 
 **Scheduler** (`BreakScheduler`) has no timers. The app calls `update(now:idleSeconds:)` about once a second.
 - States: `working`, `headsUp(kind, startsAt)`, `onBreak(kind, endsAt)`, `paused(until)`.

@@ -53,11 +53,11 @@ Rules:
 
 | Component | Layer | Responsibility |
 |---|---|---|
-| `Exercise` | Domain | Value type loaded from JSON: id, localization key, duration, allowed break types, animation script id, audio file. |
+| `Exercise` | Domain | Value type loaded from JSON: id, localization key, duration, break kind (short, or long for the walk only), animation script id, audio file. |
 | `ExerciseCatalog` | Domain | Loads `exercises.json`. Adding an exercise means adding a JSON entry, a localized string and (if new) an animation script. |
 | `Settings` | Domain | `Codable` struct: intervals, durations, long-break on/off, enabled exercise ids, chosen display mode, sounds. Defaults match `research.md`. |
 | `ExercisePicker` | Domain | Chooses the next exercise from the enabled pool for a break type. Rotates, no immediate repeats. Returns nothing if the pool is empty. |
-| `BreakPlan` | Domain | The ordered exercises for one break. Short break: one. Long break: a sequence filling the duration. |
+| `BreakPlan` | Domain | The exercise for one break, stretched to the break duration. A short break is one eye exercise; the long break is the walk. |
 | `BreakScheduler` | Domain | State machine: working, heads-up, on break, paused, snoozed. Driven by an injected `Clock` and `IdleMonitor`. Decides when the next break is due, applies the idle reset, handles postpone, skip and pause. |
 | `AppState` | View model | Owns the scheduler and settings, exposes state to the menu bar and settings views. |
 | `BreakSession` | View model | While a break runs: current exercise, countdown, progress. Feeds the overlay and the owl. |
@@ -105,7 +105,7 @@ Quality bar: this is the most important place to show polish. Plan a review roun
 
 - Settings are a single `Codable` struct stored in `UserDefaults` as JSON, behind a `SettingsStore` protocol.
 - Exclusions are stored as a set of disabled exercise ids, so exercises added in a later version default to enabled.
-- Break-type tags per exercise (short, long, both) are overridable per user.
+- No per-exercise break-type choice (decided 2026-10-26): "Stand up and walk" is the only long-break exercise. Users can only switch exercises off.
 
 ### Multi-display behaviour
 

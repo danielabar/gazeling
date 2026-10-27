@@ -33,7 +33,6 @@ private func fullyCustomised() -> Settings {
     s.headsUpLead = 45
     s.postponeDuration = 10 * 60
     s.disabledExerciseIDs = ["walk"]
-    s.breakKindOverrides = ["palming": [.long]]
     s.overlayScreen = .all
     s.soundsEnabled = false
     return s
@@ -103,19 +102,9 @@ private func fullyCustomised() -> Settings {
 
 // MARK: Exercise settings
 
-private func exercise(_ id: String, kinds: Set<BreakKind> = [.short, .long]) -> Exercise {
+private func exercise(_ id: String) -> Exercise {
     Exercise(
-        id: id, titleKey: "t", instructionKey: "i", durationSeconds: 20, defaultBreakKinds: kinds,
-        includedInEveryLongBreak: false, animationScript: id)
-}
-
-@Test func settingTagsBackToTheDefaultRemovesTheOverride() {
-    var s = Settings()
-    let e = exercise("a", kinds: [.short, .long])
-    s.setBreakKinds([.long], for: e)
-    #expect(s.breakKindOverrides == ["a": [.long]])
-    s.setBreakKinds([.short, .long], for: e)
-    #expect(s.breakKindOverrides.isEmpty)
+        id: id, titleKey: "t", instructionKey: "i", durationSeconds: 20, breakKind: .short, animationScript: id)
 }
 
 @Test func enablingAndDisablingAnExercise() {

@@ -3,6 +3,7 @@ import SwiftUI
 
 struct MenuContent: View {
     let appState: AppState
+    let settingsWindow: SettingsWindowController
 
     var body: some View {
         Text(statusText)
@@ -40,6 +41,8 @@ struct MenuContent: View {
         #endif
 
         Divider()
+        Button("Settings…") { settingsWindow.show() }
+            .keyboardShortcut(",")
         Button("Quit Gazeling") { NSApplication.shared.terminate(nil) }
             .keyboardShortcut("q")
     }

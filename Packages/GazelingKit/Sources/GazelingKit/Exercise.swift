@@ -1,6 +1,6 @@
 import Foundation
 
-/// A short break only fits one exercise; a long break chains several.
+/// A short break is one quick eye exercise. A long break is the "stand up and walk" break.
 public enum BreakKind: String, Codable, Sendable, CaseIterable {
     case short
     case long
@@ -11,10 +11,9 @@ public struct Exercise: Codable, Sendable, Equatable, Identifiable {
     public let id: String
     public let titleKey: String
     public let instructionKey: String
-    /// Nominal length. A break stretches or repeats exercises to fit its own duration.
+    /// Nominal length. A break stretches the exercise to its own duration.
     public let durationSeconds: TimeInterval
-    public let defaultBreakKinds: Set<BreakKind>
-    /// Long breaks always start with these (when enabled), so they are never dropped by a short rotation.
-    public let includedInEveryLongBreak: Bool
+    /// Which kind of break this exercise appears in. Only "Stand up and walk" is a long break exercise.
+    public let breakKind: BreakKind
     public let animationScript: String
 }

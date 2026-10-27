@@ -13,8 +13,6 @@ public struct Settings: Codable, Sendable, Equatable {
     public var postponeDuration: TimeInterval = 5 * 60
     /// Stored as the disabled set, so exercises added in a later version default to enabled.
     public var disabledExerciseIDs: Set<String> = []
-    /// Per-exercise override of the exercise's default break kinds.
-    public var breakKindOverrides: [String: Set<BreakKind>] = [:]
     /// Which screen shows the owl and the exercise text. Every screen is dimmed either way.
     public var overlayScreen: OverlayScreen = .pointer
     public var soundsEnabled = true
@@ -55,16 +53,6 @@ public struct Settings: Codable, Sendable, Equatable {
         if enabled { disabledExerciseIDs.remove(exercise.id) } else { disabledExerciseIDs.insert(exercise.id) }
     }
 
-    /// Setting the kinds back to the exercise's defaults removes the override, so a later change to the
-    /// defaults still reaches this user.
-    public mutating func setBreakKinds(_ kinds: Set<BreakKind>, for exercise: Exercise) {
-        if kinds == exercise.defaultBreakKinds {
-            breakKindOverrides[exercise.id] = nil
-        } else {
-            breakKindOverrides[exercise.id] = kinds
-        }
-    }
-
     /// The values that decide when breaks happen. Changing any of them restarts the timers.
     struct Timings: Equatable {
         var shortInterval, shortDuration, longInterval, longDuration, headsUp: TimeInterval
@@ -74,10 +62,6 @@ public struct Settings: Codable, Sendable, Equatable {
         Timings(
             shortInterval: shortBreakInterval, shortDuration: shortBreakDuration, longInterval: longBreakInterval,
             longDuration: longBreakDuration, headsUp: headsUpLead)
-    }
-
-    public func breakKinds(for exercise: Exercise) -> Set<BreakKind> {
-        breakKindOverrides[exercise.id] ?? exercise.defaultBreakKinds
     }
 
     public func breakInterval(for kind: BreakKind) -> TimeInterval {
@@ -106,9 +90,6 @@ public struct Settings: Codable, Sendable, Equatable {
             try c.decodeIfPresent(TimeInterval.self, forKey: .postponeDuration) ?? d.postponeDuration
         disabledExerciseIDs =
             try c.decodeIfPresent(Set<String>.self, forKey: .disabledExerciseIDs) ?? d.disabledExerciseIDs
-        breakKindOverrides =
-            try c.decodeIfPresent([String: Set<BreakKind>].self, forKey: .breakKindOverrides)
-            ?? d.breakKindOverrides
         overlayScreen = try c.decodeIfPresent(OverlayScreen.self, forKey: .overlayScreen) ?? d.overlayScreen
         soundsEnabled = try c.decodeIfPresent(Bool.self, forKey: .soundsEnabled) ?? d.soundsEnabled
     }

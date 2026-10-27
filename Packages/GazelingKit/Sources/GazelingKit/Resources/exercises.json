@@ -4,8 +4,7 @@
     "titleKey": "exercise.blink.title",
     "instructionKey": "exercise.blink.instruction",
     "durationSeconds": 20,
-    "defaultBreakKinds": ["short", "long"],
-    "includedInEveryLongBreak": true,
+    "breakKind": "short",
     "animationScript": "blink"
   },
   {
@@ -13,8 +12,7 @@
     "titleKey": "exercise.look-far.title",
     "instructionKey": "exercise.look-far.instruction",
     "durationSeconds": 20,
-    "defaultBreakKinds": ["short", "long"],
-    "includedInEveryLongBreak": true,
+    "breakKind": "short",
     "animationScript": "look-far"
   },
   {
@@ -22,8 +20,7 @@
     "titleKey": "exercise.side-to-side.title",
     "instructionKey": "exercise.side-to-side.instruction",
     "durationSeconds": 20,
-    "defaultBreakKinds": ["short", "long"],
-    "includedInEveryLongBreak": false,
+    "breakKind": "short",
     "animationScript": "side-to-side"
   },
   {
@@ -31,8 +28,7 @@
     "titleKey": "exercise.up-down.title",
     "instructionKey": "exercise.up-down.instruction",
     "durationSeconds": 20,
-    "defaultBreakKinds": ["short", "long"],
-    "includedInEveryLongBreak": false,
+    "breakKind": "short",
     "animationScript": "up-down"
   },
   {
@@ -40,8 +36,7 @@
     "titleKey": "exercise.circle-left.title",
     "instructionKey": "exercise.circle-left.instruction",
     "durationSeconds": 20,
-    "defaultBreakKinds": ["short", "long"],
-    "includedInEveryLongBreak": false,
+    "breakKind": "short",
     "animationScript": "circle-left"
   },
   {
@@ -49,8 +44,7 @@
     "titleKey": "exercise.circle-right.title",
     "instructionKey": "exercise.circle-right.instruction",
     "durationSeconds": 20,
-    "defaultBreakKinds": ["short", "long"],
-    "includedInEveryLongBreak": false,
+    "breakKind": "short",
     "animationScript": "circle-right"
   },
   {
@@ -58,8 +52,7 @@
     "titleKey": "exercise.palming.title",
     "instructionKey": "exercise.palming.instruction",
     "durationSeconds": 30,
-    "defaultBreakKinds": ["short", "long"],
-    "includedInEveryLongBreak": false,
+    "breakKind": "short",
     "animationScript": "palming"
   },
   {
@@ -67,8 +60,7 @@
     "titleKey": "exercise.walk.title",
     "instructionKey": "exercise.walk.instruction",
     "durationSeconds": 60,
-    "defaultBreakKinds": ["long"],
-    "includedInEveryLongBreak": true,
+    "breakKind": "long",
     "animationScript": "walk"
   },
   {
@@ -76,8 +68,7 @@
     "titleKey": "exercise.eyes-closed-rest.title",
     "instructionKey": "exercise.eyes-closed-rest.instruction",
     "durationSeconds": 20,
-    "defaultBreakKinds": ["long"],
-    "includedInEveryLongBreak": false,
+    "breakKind": "short",
     "animationScript": "eyes-closed-rest"
   }
 ]
