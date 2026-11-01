@@ -3,10 +3,11 @@ import SwiftUI
 
 struct SettingsView: View {
     let appState: AppState
+    let launchAtLogin: LaunchAtLoginModel
 
     var body: some View {
         TabView {
-            GeneralSettingsView(appState: appState)
+            GeneralSettingsView(appState: appState, launchAtLogin: launchAtLogin)
                 .tabItem { Label("General", systemImage: "gearshape") }
             BreaksSettingsView(appState: appState)
                 .tabItem { Label("Breaks", systemImage: "timer") }
