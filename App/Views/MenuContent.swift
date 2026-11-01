@@ -38,6 +38,12 @@ struct MenuContent: View {
             Button("Debug: goodbye wave (4 s)") {
                 if let exercise = appState.exercises.first { appState.playNow(exercise: exercise, seconds: 4) }
             }
+            Menu("Debug: launch at login spike") {
+                Button("Log status") { LaunchAtLoginSpike.logStatus() }
+                Button("Register") { LaunchAtLoginSpike.register() }
+                Button("Unregister") { LaunchAtLoginSpike.unregister() }
+                Button("Open Login Items settings") { LaunchAtLoginSpike.openLoginItems() }
+            }
         #endif
 
         Divider()
