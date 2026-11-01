@@ -35,13 +35,12 @@ First PR: a GitHub Actions workflow that runs the package tests (`make test` / `
 
 Phase 5 remaining slices. The product owner checks each one by hand (they are not a Mac developer; the agent cannot see the screen). After each slice: commit only when they say so, and update this file.
 
-### Slice 4: launch at login (needs the user at the keyboard)
+### Slice 4: launch at login (built on branch `phase5-slice4-launch-at-login`, awaiting hand check; plan in `scratch/phase5-slice4-launch-at-login/plan.md`)
 
-1. **Spike first, then build UI.** Launch at login in the App Sandbox is still **unverified**. In a throwaway debug menu item, call `SMAppService.mainApp.register()` under ad-hoc signing and log the result and `SMAppService.mainApp.status` with `os.Logger`. Expect `.requiresApproval`: the user must approve it in System Settings → General → Login Items & Extensions. Record the findings in `docs/architecture.md` (platform findings table).
-2. **Warn the user before they test, and have them undo it.** Registering makes macOS launch the *development build* (it lives in DerivedData) at every login on their real Mac. Tell them first, and tell them to switch it off afterwards (toggle in the app, or System Settings → Login Items).
-3. **Do not store the toggle in `Settings`.** Read `SMAppService.mainApp.status` every time the General tab is shown, because the user can change it in System Settings behind the app's back.
-4. Put it behind a protocol (`LaunchAtLogin`, listed in plan.md section 2) with a fake for tests, like the other adapters (`Packages/GazelingKit/Sources/GazelingKit/Adapters.swift`).
-5. UI: a toggle on the General tab (`App/Settings/GeneralSettingsView.swift`). When the status is `.requiresApproval`, show a short explanation and a button using `SMAppService.openSystemSettingsLoginItems()`.
+- Spike result (in `docs/architecture.md`): `register()` works in the sandbox, no approval needed, status `.enabled`. A never-registered build reports `.notFound`, so `.notFound` and `.notRegistered` both mean off.
+- Built: `LaunchAtLogin` protocol and `LaunchAtLoginStatus` (`Adapters.swift`), `LaunchAtLoginModel` (tests in `LaunchAtLoginModelTests.swift`, 123 tests pass), real adapter `App/Adapters/SMAppServiceLaunchAtLogin.swift`, toggle on the General tab (re-reads status on show and when the app becomes active). Status is never stored in `Settings`.
+- Left: product owner checks Part 2 of the Slice 4 section in `scratch/manual-verification/phase5.md`, then commit, PR.
+- **Later cleanup reminder (suggest Phase 7, before release):** review all Debug menu items and `#if DEBUG` code, including `App/LaunchAtLoginSpike.swift` and its "Debug: launch at login spike" menu. Kept for now on purpose.
 
 ### Slice 5: first-run setup
 
