@@ -16,7 +16,8 @@ struct GazelingApp: App {
         state.start()
         if debug.breakNow { state.startBreakNow(.short) }
         _appState = State(initialValue: state)
-        let settingsWindow = SettingsWindowController(appState: state)
+        let settingsWindow = SettingsWindowController(
+            appState: state, launchAtLogin: LaunchAtLoginModel(adapter: SMAppServiceLaunchAtLogin()))
         self.settingsWindow = settingsWindow
         AppDelegate.onReopen = { settingsWindow.show() }
     }

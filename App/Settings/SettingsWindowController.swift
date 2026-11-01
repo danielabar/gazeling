@@ -8,9 +8,11 @@ import SwiftUI
 final class SettingsWindowController {
     private var window: NSWindow?
     private let appState: AppState
+    private let launchAtLogin: LaunchAtLoginModel
 
-    init(appState: AppState) {
+    init(appState: AppState, launchAtLogin: LaunchAtLoginModel) {
         self.appState = appState
+        self.launchAtLogin = launchAtLogin
     }
 
     func show() {
@@ -20,7 +22,7 @@ final class SettingsWindowController {
                 defer: false)
             window.title = String(localized: "Gazeling Settings")
             window.isReleasedWhenClosed = false
-            window.contentView = NSHostingView(rootView: SettingsView(appState: appState))
+            window.contentView = NSHostingView(rootView: SettingsView(appState: appState, launchAtLogin: launchAtLogin))
             window.center()
             self.window = window
         }

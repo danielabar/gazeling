@@ -3,9 +3,28 @@ import SwiftUI
 
 struct GeneralSettingsView: View {
     let appState: AppState
+    let launchAtLogin: LaunchAtLoginModel
 
     var body: some View {
         Form {
+            Section("When I log in") {
+                Toggle(
+                    "Start Gazeling when I log in",
+                    isOn: Binding(get: { launchAtLogin.isOn }, set: { launchAtLogin.setEnabled($0) }))
+                if launchAtLogin.needsApproval {
+                    Text(
+                        "macOS needs your approval. Turn Gazeling on in System Settings → General → Login Items & Extensions."
+                    )
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    Button("Open Login Items") { launchAtLogin.openSystemSettings() }
+                }
+                if let message = launchAtLogin.errorMessage {
+                    Text(message)
+                        .font(.callout)
+                        .foregroundStyle(.red)
+                }
+            }
             Section("During a break") {
                 Picker("Show the owl on", selection: appState.binding(\.overlayScreen)) {
                     Text("The screen with my pointer").tag(OverlayScreen.pointer)
@@ -19,5 +38,9 @@ struct GeneralSettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .onAppear { launchAtLogin.refresh() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            launchAtLogin.refresh()
+        }
     }
 }

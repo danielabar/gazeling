@@ -30,3 +30,21 @@ public protocol SoundPlayer {
     func playBreakStart()
     func playBreakEnd()
 }
+
+/// Whether macOS will start the app at login. Never stored by the app: macOS owns it and the user
+/// can change it in System Settings at any time.
+public enum LaunchAtLoginStatus: Equatable, Sendable {
+    case off
+    case on
+    /// Registered, but the user must allow it in System Settings → General → Login Items & Extensions.
+    case requiresApproval
+}
+
+@MainActor
+public protocol LaunchAtLogin {
+    /// Read fresh from macOS on every call.
+    var status: LaunchAtLoginStatus { get }
+    func register() throws
+    func unregister() throws
+    func openSystemSettings()
+}
