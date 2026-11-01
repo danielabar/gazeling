@@ -86,24 +86,17 @@ private func breakKinds(_ s: inout BreakScheduler, until: TimeInterval) -> [Brea
     #expect(breakKinds(&s, until: 62 * min) == [.short, .long])
 }
 
-@Test func idleForAShortBreakResetsOnlyTheShortTimer() {
+@Test func beingAwayResetsBothTimers() {
     var s = scheduler()
     run(&s, from: 0, to: 10 * min)
-    s.update(now: at(10 * min + 5), idleSeconds: 20)
+    s.update(now: at(10 * min + 5), idleSeconds: BreakScheduler.awayThreshold)
     #expect(s.shortDue == at(10 * min + 5 + 20 * min))
-    #expect(s.longDue == at(60 * min))
-}
-
-@Test func idleForALongBreakResetsBothTimers() {
-    var s = scheduler()
-    run(&s, from: 0, to: 10 * min)
-    s.update(now: at(10 * min + 5), idleSeconds: 5 * min)
     #expect(s.longDue == at(10 * min + 5 + 60 * min))
 }
 
-@Test func briefIdleDoesNotReset() {
+@Test func shortIdleDoesNotReset() {
     var s = scheduler()
-    s.update(now: at(5), idleSeconds: 19)
+    s.update(now: at(5), idleSeconds: BreakScheduler.awayThreshold - 1)
     #expect(s.shortDue == at(20 * min))
 }
 
@@ -124,11 +117,18 @@ private func breakKinds(_ s: inout BreakScheduler, until: TimeInterval) -> [Brea
             == .onBreak(kind: .short, endsAt: at(20 * min + 20)))
 }
 
-@Test func idleThroughTheHeadsUpCountsAsTheBreakTaken() {
+@Test func beingAwayDuringTheHeadsUpCountsAsTheBreakTaken() {
     var s = scheduler()
     run(&s, from: 0, to: 20 * min - 30)
-    #expect(s.update(now: at(20 * min - 20), idleSeconds: 20) == .working)
+    #expect(s.update(now: at(20 * min - 20), idleSeconds: BreakScheduler.awayThreshold) == .working)
     #expect(s.shortDue == at(20 * min - 20 + 20 * min))
+}
+
+@Test func staringAtTheScreenThroughTheHeadsUpStillStartsTheBreak() {
+    var s = scheduler()
+    run(&s, from: 0, to: 20 * min - 30)
+    s.update(now: at(20 * min - 20), idleSeconds: 25)
+    #expect(s.update(now: at(20 * min), idleSeconds: 60) == .onBreak(kind: .short, endsAt: at(20 * min + 20)))
 }
 
 @Test func skipDuringHeadsUpRestartsTheFullInterval() {

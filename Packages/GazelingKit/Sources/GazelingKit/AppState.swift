@@ -9,6 +9,8 @@ public final class AppState {
     public private(set) var state: BreakState = .working
     public private(set) var session: BreakSession?
     public private(set) var settings: Settings
+    /// When the next break is due, or nil if none is (all exercises off, or paused). Stored so views redraw when it moves.
+    public private(set) var nextBreakDate: Date?
 
     @ObservationIgnored private var scheduler: BreakScheduler
     @ObservationIgnored private var picker: ExercisePicker
@@ -49,6 +51,7 @@ public final class AppState {
         self.exercises = catalog.exercises
         self.scheduler = BreakScheduler(
             settings: effective, availableKinds: picker.availableKinds(settings: effective), now: clock())
+        self.nextBreakDate = scheduler.nextBreak()?.due
     }
 
     /// Asks for notification permission and starts polling once a second.
@@ -142,17 +145,16 @@ public final class AppState {
         return !picker.availableKinds(settings: s).isEmpty
     }
 
-    /// When the next break is due, or nil if none is (all exercises off, or paused).
-    public var nextBreakDate: Date? {
-        if case .paused = state { return nil }
-        return scheduler.nextBreak()?.due
-    }
-
     // MARK: State changes
 
     private func perform(_ change: (inout BreakScheduler) -> Void) {
         let previous = scheduler.state
         change(&scheduler)
+        if case .paused = scheduler.state {
+            nextBreakDate = nil
+        } else {
+            nextBreakDate = scheduler.nextBreak()?.due
+        }
         transition(from: previous, to: scheduler.state)
     }
 

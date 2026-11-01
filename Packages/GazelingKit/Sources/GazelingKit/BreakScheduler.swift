@@ -16,6 +16,10 @@ public struct BreakScheduler: Sendable {
     /// suspended). The gap counts as idle time, so waking the Mac never starts a break at once.
     public static let clockJumpThreshold: TimeInterval = 60
 
+    /// Input idle time that counts as being away from the Mac, which restarts both timers. It is long
+    /// because no keyboard or mouse input does not mean resting: reading or watching still strains the eyes.
+    public static let awayThreshold: TimeInterval = 5 * 60
+
     public private(set) var state: BreakState = .working
     public private(set) var shortDue: Date
     public private(set) var longDue: Date
@@ -80,20 +84,16 @@ public struct BreakScheduler: Sendable {
                 state = .working
             }
         case .headsUp(let kind, let startsAt):
-            if idle >= settings.breakDuration(for: kind) {
-                // The user already rested for a whole break.
-                reset(kind, now: now)
+            if idle >= Self.awayThreshold {
+                // The user is away from the Mac.
+                reset(.long, now: now)
                 state = .working
             } else if now >= startsAt {
                 state = .onBreak(
                     kind: kind, endsAt: now.addingTimeInterval(settings.breakDuration(for: kind)))
             }
         case .working:
-            if idle >= settings.longBreakDuration {
-                reset(.long, now: now)
-            } else if idle >= settings.shortBreakDuration {
-                reset(.short, now: now)
-            }
+            if idle >= Self.awayThreshold { reset(.long, now: now) }
             if let next = nextBreak() {
                 if now >= next.due {
                     state = .onBreak(

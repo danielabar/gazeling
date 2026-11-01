@@ -39,8 +39,8 @@ All of this is plain Swift with no UI imports. `scripts/test.sh` runs the tests 
 - States: `working`, `headsUp(kind, startsAt)`, `onBreak(kind, endsAt)`, `paused(until)`.
 - Timers restart when a break **ends** (or is skipped). A short break restarts the short timer; a long break restarts both.
 - A long break replaces a short break that would fall within half a short interval before it (so a short break never ends just before a long one starts).
-- Idle in `working`: idle >= short break length restarts the short timer; idle >= long break length restarts both.
-- Idle during a break is ignored. Idle for a full break length during the heads-up counts as the break taken.
+- Idle in `working`: idle >= `awayThreshold` (5 min) restarts both timers. Shorter idle is ignored, because reading or watching a screen without input is not an eye rest (changed 2026-11-01; the old rule reset the short timer after 20 s idle, so breaks never came for someone reading).
+- Idle during a break is ignored. Idle for `awayThreshold` during the heads-up counts as the break taken.
 - Clock jump: if two updates are more than 60 s apart (Mac slept), the gap counts as idle. Waking never starts a break. The app must therefore poll often while awake.
 - Skip restarts the timer for that break's kind. Postpone (only from the heads-up) pushes that kind's due time by `postponeDuration`. Pause and resume restart both timers.
 - `apply(settings:availableKinds:now:)` restarts timers when settings change.
