@@ -29,7 +29,7 @@ public struct AnimatedOwlView: View {
                 OwlView(pose: pose(at: context.date), palette: palette)
                     .frame(width: height * OwlView.canvas.width / OwlView.canvas.height, height: height)
                 if scene == .window {
-                    WindowSceneView(time: context.date.timeIntervalSince(stepStart))
+                    WindowSceneView(time: max(0, context.date.timeIntervalSince(stepStart)))
                         .frame(width: height, height: height)
                 }
             }

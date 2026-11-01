@@ -4,12 +4,32 @@ Living status document. **Future agents: read `CLAUDE.md`, then this file, befor
 
 ## Where we are (last updated 2026-10-26)
 
-- **Phase 5 (settings and polish), slices 1 to 3 of 6 done and committed.** Latest commit: `6dd3e97`. Branch `main`, no remote, working tree clean.
+- **Phase 5 (settings and polish), slices 1 to 3 of 6 done and committed.** Latest commit: `6dd3e97`. Branch `main`, remote `origin` = github.com/danielabar/gazeling (SSH), in sync.
 - 100 unit tests, all passing (`make test`). The app builds (`make build`).
 - Phases 0 to 4 are complete. Phase 4 (the owl) was reviewed and approved by the product owner.
 - The product owner works on a **laptop only** for now (no external monitor), and stopped for the day after slice 3. They will pick it up the next day with a new agent.
 
+## Session 2026-11-01 (not yet in the list above)
+
+- Committed to `main` directly (product owner's call, pre-release): idle reset changed to 5 min away only (reading or watching without input is not rest); the menu's "Next break at" now updates when settings change (`AppState.nextBreakDate` is observed).
+- Branch `break-lead-in` (uncommitted, awaiting hand check): 5 s reading lead-in for short breaks (`Settings.breakLeadIn`, scheduler `endsAt`, `BreakSession.leadIn`), instruction text 30 pt and 720 pt wide. Plan in `scratch/break-lead-in/plan.md`. 113 tests pass. To check by hand: `make demo`, expect the instruction with the countdown held at 0:20 for 5 s, then the 20 s countdown with the owl moving.
+
+## Git workflow (from 2026-10-27: branches and PRs)
+
+The repo now has a GitHub remote, so `main` is no longer committed to directly.
+
+- **One branch per slice or task**, named like `phase5-slice4-launch-at-login` or `ci-github-actions`. Branch from an up-to-date `main`.
+- Commit to the branch **only when the product owner says "commit"** (usually after they checked the slice by hand). Keep commits small. Check for secrets first.
+- **Push and open a PR (`gh pr create`) only when asked.** Pushing publishes the work. End PR descriptions with the attribution line from the session instructions.
+- The product owner merges the PR on GitHub (squash merge, one commit per slice). Afterwards: `git switch main && git pull`, delete the branch.
+- Once CI exists (see the CI task below), a PR should be green before merging.
+- Worklog updates ride along in the slice's PR, not as separate commits to `main`.
+
 ## START HERE: next steps, in order
+
+### Before slice 4: CI on its own branch and PR
+
+First PR: a GitHub Actions workflow that runs the package tests (`make test` / `scripts/test.sh`) and builds the app on a macOS runner for every PR and push to `main`. Agree the plan with the product owner before building.
 
 Phase 5 remaining slices. The product owner checks each one by hand (they are not a Mac developer; the agent cannot see the screen). After each slice: commit only when they say so, and update this file.
 
@@ -106,7 +126,7 @@ Phase 5 remaining slices. The product owner checks each one by hand (they are no
 - `AppState`, `BreakSession` and the adapter protocols are in `GazelingKit`, not the app target, so they can be tested with fakes.
 - Planning docs are in `docs/planning/`; the brainstorm files are in `scratch/` (globally gitignored).
 - UI strings are natural-English keys (`Text("Every")`), which display correctly in English without a catalog entry. `Localizable.xcstrings` holds only the exercise keys (referenced from JSON). Command-line `xcodebuild` has never updated the catalog. Decide in Phase 7, before any translation: `xcodebuild -exportLocalizations`, or open the project in Xcode once and commit the result.
-- LICENSE copyright holder "Daniela Baron" was guessed from the email address. Ask the user to confirm.
+- LICENSE copyright holder "Daniela Baron": confirmed by the product owner (2026-10-27).
 - Notification Skip/Postpone buttons: not built (menu and overlay only).
 
 ## Challenges and findings

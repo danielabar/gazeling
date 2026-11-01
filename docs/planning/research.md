@@ -45,9 +45,10 @@ No trial supports these exact numbers (see [Open questions for the schedule](#op
 | Short break | Every **20 minutes** of computer use, lasting **20 seconds** |
 | Long break | Every **60 minutes** of computer use, lasting **5 minutes** (replaces that hour's short break) |
 | Heads-up before a break | Gentle notification about **30 seconds** ahead, with Skip and Postpone |
+| Reading time | Short breaks start with a 5 s lead-in: the instruction shows and the countdown holds at the full length, then the break runs for its set length (added 2026-11-01). Long break has none |
 | Exercise choice, short break | One exercise per break, taken from the enabled short-break exercises in rotation (no immediate repeats) |
 | Exercise choice, long break | **Stand up and walk, for the whole 5 minutes** (changed 2026-10-26: chaining eye exercises for 5 minutes could make people dizzy) |
-| Away from the computer | If the Mac is idle for at least as long as a break, the timer resets, since the user already rested |
+| Away from the computer | If there is no keyboard or mouse input for 5 minutes, both timers reset (changed 2026-11-01 from "idle as long as a break": reading or watching without input is not rest) |
 | Strict mode | Off. Skip and Esc always work. |
 
 **Configuration**

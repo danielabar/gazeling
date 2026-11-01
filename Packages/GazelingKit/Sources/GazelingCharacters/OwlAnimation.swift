@@ -20,7 +20,9 @@ public enum OwlAnimation {
     /// Seconds before the end of a whole break that the owl waves goodbye.
     public static let goodbyeLength = 2.2
 
-    public static func pose(script: String, at t: TimeInterval, duration: TimeInterval) -> OwlPose {
+    /// A `t` before the step starts (the lead-in) holds the opening pose.
+    public static func pose(script: String, at time: TimeInterval, duration: TimeInterval) -> OwlPose {
+        let t = max(0, time)
         let base = scriptPose(script, t: t, duration: duration)
         // Ease in from, and back out to, a neutral pose, so steps and the cut at the end of a step never jump.
         let edge = min(smooth(t / edgeBlend), smooth((duration - t) / edgeBlend))

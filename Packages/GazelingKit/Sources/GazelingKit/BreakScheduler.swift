@@ -16,6 +16,10 @@ public struct BreakScheduler: Sendable {
     /// suspended). The gap counts as idle time, so waking the Mac never starts a break at once.
     public static let clockJumpThreshold: TimeInterval = 60
 
+    /// Input idle time that counts as being away from the Mac, which restarts both timers. It is long
+    /// because no keyboard or mouse input does not mean resting: reading or watching still strains the eyes.
+    public static let awayThreshold: TimeInterval = 5 * 60
+
     public private(set) var state: BreakState = .working
     public private(set) var shortDue: Date
     public private(set) var longDue: Date
@@ -56,6 +60,11 @@ public struct BreakScheduler: Sendable {
         }
     }
 
+    /// A break lasts its lead-in (time to read the instruction) plus its configured length.
+    private func breakEnd(_ kind: BreakKind, from now: Date) -> Date {
+        now.addingTimeInterval(settings.breakLeadIn(for: kind) + settings.breakDuration(for: kind))
+    }
+
     private mutating func restartTimer(for kind: BreakKind, now: Date) {
         let due = now.addingTimeInterval(settings.breakInterval(for: kind))
         if kind == .short { shortDue = due } else { longDue = due }
@@ -80,24 +89,18 @@ public struct BreakScheduler: Sendable {
                 state = .working
             }
         case .headsUp(let kind, let startsAt):
-            if idle >= settings.breakDuration(for: kind) {
-                // The user already rested for a whole break.
-                reset(kind, now: now)
+            if idle >= Self.awayThreshold {
+                // The user is away from the Mac.
+                reset(.long, now: now)
                 state = .working
             } else if now >= startsAt {
-                state = .onBreak(
-                    kind: kind, endsAt: now.addingTimeInterval(settings.breakDuration(for: kind)))
+                state = .onBreak(kind: kind, endsAt: breakEnd(kind, from: now))
             }
         case .working:
-            if idle >= settings.longBreakDuration {
-                reset(.long, now: now)
-            } else if idle >= settings.shortBreakDuration {
-                reset(.short, now: now)
-            }
+            if idle >= Self.awayThreshold { reset(.long, now: now) }
             if let next = nextBreak() {
                 if now >= next.due {
-                    state = .onBreak(
-                        kind: next.kind, endsAt: now.addingTimeInterval(settings.breakDuration(for: next.kind)))
+                    state = .onBreak(kind: next.kind, endsAt: breakEnd(next.kind, from: now))
                 } else if now >= next.due.addingTimeInterval(-settings.headsUpLead) {
                     state = .headsUp(kind: next.kind, startsAt: next.due)
                 }
@@ -110,7 +113,8 @@ public struct BreakScheduler: Sendable {
     public mutating func startBreak(_ kind: BreakKind, now: Date, duration: TimeInterval? = nil) {
         guard availableKinds.contains(kind) else { return }
         if case .paused = state { return }
-        state = .onBreak(kind: kind, endsAt: now.addingTimeInterval(duration ?? settings.breakDuration(for: kind)))
+        let endsAt = duration.map { now.addingTimeInterval($0) } ?? breakEnd(kind, from: now)
+        state = .onBreak(kind: kind, endsAt: endsAt)
     }
 
     /// Cancels the current or upcoming break and restarts the timer for its kind.
