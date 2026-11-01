@@ -172,23 +172,26 @@ public final class AppState {
             notifier.removeHeadsUp()
         }
 
-        if case .onBreak(let kind, _) = current {
+        if case .onBreak(let kind, let endsAt) = current {
             if case .onBreak = previous {
                 session?.update(now: now)
             } else {
-                startSession(kind: kind, now: now)
+                startSession(kind: kind, endsAt: endsAt, now: now)
             }
         } else if case .onBreak(_, let endsAt) = previous {
             endSession(finished: now >= endsAt)
         }
     }
 
-    private func startSession(kind: BreakKind, now: Date) {
+    private func startSession(kind: BreakKind, endsAt: Date, now: Date) {
         guard let plan = forcedPlan ?? picker.plan(for: kind, settings: effectiveSettings) else {
             perform { $0.skip(now: now) }
             return
         }
-        let session = BreakSession(plan: plan, startedAt: now)
+        // The scheduler decides when the break ends; whatever the plan does not fill is the lead-in.
+        let planSeconds = plan.steps.map(\.seconds).reduce(0, +)
+        let leadIn = max(0, endsAt.timeIntervalSince(now) - planSeconds)
+        let session = BreakSession(plan: plan, startedAt: now, leadIn: leadIn)
         self.session = session
         overlay.show(
             session: session, contentScreens: settings.overlayScreen,

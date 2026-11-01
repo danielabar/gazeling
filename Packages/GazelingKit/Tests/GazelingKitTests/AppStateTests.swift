@@ -68,7 +68,7 @@ private final class Harness {
     let h = Harness()
     await h.advance(20 * 60)
     h.fakes.events = []
-    await h.advance(19)
+    await h.advance(24)
     #expect(h.fakes.events.isEmpty)
     await h.advance(1)
     #expect(h.fakes.events == ["hide", "endSound"])
@@ -78,9 +78,27 @@ private final class Harness {
 @Test @MainActor func sessionCountsDown() async {
     let h = Harness()
     await h.advance(20 * 60)
-    await h.advance(5)
+    await h.advance(5 + 5)
     #expect(h.app.session?.remaining == 15)
     #expect(h.app.session?.stepIndex == 0)
+}
+
+@Test @MainActor func shortBreakSessionHasALeadInAndLongDoesNot() async {
+    let h = Harness()
+    await h.advance(20 * 60)
+    #expect(h.app.session?.leadIn == 5)
+    #expect(h.app.session?.remaining == 20)
+    h.app.skipCurrentBreak()
+    h.app.startBreakNow(.long)
+    #expect(h.app.session?.leadIn == 0)
+}
+
+@Test @MainActor func playingAnExerciseForAGivenLengthHasNoLeadIn() async {
+    let h = Harness()
+    let exercise = try! ExerciseCatalog.bundled().exercises[0]
+    h.app.playNow(exercise: exercise, seconds: 4)
+    #expect(h.app.session?.leadIn == 0)
+    #expect(h.app.session?.endsAt == h.now.addingTimeInterval(4))
 }
 
 @Test @MainActor func skippingTheBreakHidesOverlayWithoutEndSound() async {

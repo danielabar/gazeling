@@ -87,6 +87,12 @@ public struct Settings: Codable, Sendable, Equatable {
         kind == .short ? shortBreakInterval : longBreakInterval
     }
 
+    /// Time at the start of a break to read the instruction before the countdown begins. Short breaks only:
+    /// the long break is a walk and needs no explanation.
+    public func breakLeadIn(for kind: BreakKind) -> TimeInterval {
+        kind == .short ? 5 : 0
+    }
+
     public func breakDuration(for kind: BreakKind) -> TimeInterval {
         kind == .short ? shortBreakDuration : longBreakDuration
     }

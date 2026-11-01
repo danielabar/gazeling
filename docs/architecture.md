@@ -40,6 +40,7 @@ All of this is plain Swift with no UI imports. `scripts/test.sh` runs the tests 
 - Timers restart when a break **ends** (or is skipped). A short break restarts the short timer; a long break restarts both.
 - A long break replaces a short break that would fall within half a short interval before it (so a short break never ends just before a long one starts).
 - Idle in `working`: idle >= `awayThreshold` (5 min) restarts both timers. Shorter idle is ignored, because reading or watching a screen without input is not an eye rest (changed 2026-11-01; the old rule reset the short timer after 20 s idle, so breaks never came for someone reading).
+- A break lasts a lead-in plus its length: `endsAt = start + Settings.breakLeadIn(kind) + breakDuration(kind)`. The lead-in is 5 s for short breaks and 0 for long. `BreakSession` shows the instruction with the countdown frozen at the full length until the lead-in ends, then the exercise and countdown run. `startBreak(duration:)` (debug) has no lead-in.
 - Idle during a break is ignored. Idle for `awayThreshold` during the heads-up counts as the break taken.
 - Clock jump: if two updates are more than 60 s apart (Mac slept), the gap counts as idle. Waking never starts a break. The app must therefore poll often while awake.
 - Skip restarts the timer for that break's kind. Postpone (only from the heads-up) pushes that kind's due time by `postponeDuration`. Pause and resume restart both timers.

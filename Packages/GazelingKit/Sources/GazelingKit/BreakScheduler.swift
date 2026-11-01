@@ -60,6 +60,11 @@ public struct BreakScheduler: Sendable {
         }
     }
 
+    /// A break lasts its lead-in (time to read the instruction) plus its configured length.
+    private func breakEnd(_ kind: BreakKind, from now: Date) -> Date {
+        now.addingTimeInterval(settings.breakLeadIn(for: kind) + settings.breakDuration(for: kind))
+    }
+
     private mutating func restartTimer(for kind: BreakKind, now: Date) {
         let due = now.addingTimeInterval(settings.breakInterval(for: kind))
         if kind == .short { shortDue = due } else { longDue = due }
@@ -89,15 +94,13 @@ public struct BreakScheduler: Sendable {
                 reset(.long, now: now)
                 state = .working
             } else if now >= startsAt {
-                state = .onBreak(
-                    kind: kind, endsAt: now.addingTimeInterval(settings.breakDuration(for: kind)))
+                state = .onBreak(kind: kind, endsAt: breakEnd(kind, from: now))
             }
         case .working:
             if idle >= Self.awayThreshold { reset(.long, now: now) }
             if let next = nextBreak() {
                 if now >= next.due {
-                    state = .onBreak(
-                        kind: next.kind, endsAt: now.addingTimeInterval(settings.breakDuration(for: next.kind)))
+                    state = .onBreak(kind: next.kind, endsAt: breakEnd(next.kind, from: now))
                 } else if now >= next.due.addingTimeInterval(-settings.headsUpLead) {
                     state = .headsUp(kind: next.kind, startsAt: next.due)
                 }
@@ -110,7 +113,8 @@ public struct BreakScheduler: Sendable {
     public mutating func startBreak(_ kind: BreakKind, now: Date, duration: TimeInterval? = nil) {
         guard availableKinds.contains(kind) else { return }
         if case .paused = state { return }
-        state = .onBreak(kind: kind, endsAt: now.addingTimeInterval(duration ?? settings.breakDuration(for: kind)))
+        let endsAt = duration.map { now.addingTimeInterval($0) } ?? breakEnd(kind, from: now)
+        state = .onBreak(kind: kind, endsAt: endsAt)
     }
 
     /// Cancels the current or upcoming break and restarts the timer for its kind.

@@ -37,18 +37,18 @@ private func scheduler(_ settings: Settings = Settings(), kinds: Set<BreakKind> 
         s.update(now: at(20 * min - 1), idleSeconds: 0)
             == .headsUp(kind: .short, startsAt: at(20 * min)))
     #expect(
-        s.update(now: at(20 * min), idleSeconds: 0) == .onBreak(kind: .short, endsAt: at(20 * min + 20))
+        s.update(now: at(20 * min), idleSeconds: 0) == .onBreak(kind: .short, endsAt: at(20 * min + 25))
     )
     #expect(
-        s.update(now: at(20 * min + 19), idleSeconds: 0)
-            == .onBreak(kind: .short, endsAt: at(20 * min + 20)))
-    #expect(s.update(now: at(20 * min + 20), idleSeconds: 0) == .working)
+        s.update(now: at(20 * min + 24), idleSeconds: 0)
+            == .onBreak(kind: .short, endsAt: at(20 * min + 25)))
+    #expect(s.update(now: at(20 * min + 25), idleSeconds: 0) == .working)
 }
 
 @Test func timersRestartWhenTheBreakEndsNotWhenItStarts() {
     var s = scheduler()
-    run(&s, from: 0, to: 20 * min + 20)
-    #expect(s.shortDue == at(20 * min + 20 + 20 * min))
+    run(&s, from: 0, to: 20 * min + 25)
+    #expect(s.shortDue == at(20 * min + 25 + 20 * min))
 }
 
 /// Kinds of the breaks that start while polling from 0 to `until`.
@@ -114,7 +114,7 @@ private func breakKinds(_ s: inout BreakScheduler, until: TimeInterval) -> [Brea
     run(&s, from: 0, to: 20 * min)
     #expect(
         s.update(now: at(20 * min + 10), idleSeconds: 3600)
-            == .onBreak(kind: .short, endsAt: at(20 * min + 20)))
+            == .onBreak(kind: .short, endsAt: at(20 * min + 25)))
 }
 
 @Test func beingAwayDuringTheHeadsUpCountsAsTheBreakTaken() {
@@ -128,7 +128,7 @@ private func breakKinds(_ s: inout BreakScheduler, until: TimeInterval) -> [Brea
     var s = scheduler()
     run(&s, from: 0, to: 20 * min - 30)
     s.update(now: at(20 * min - 20), idleSeconds: 25)
-    #expect(s.update(now: at(20 * min), idleSeconds: 60) == .onBreak(kind: .short, endsAt: at(20 * min + 20)))
+    #expect(s.update(now: at(20 * min), idleSeconds: 60) == .onBreak(kind: .short, endsAt: at(20 * min + 25)))
 }
 
 @Test func skipDuringHeadsUpRestartsTheFullInterval() {
@@ -170,7 +170,7 @@ private func breakKinds(_ s: inout BreakScheduler, until: TimeInterval) -> [Brea
     #expect(run(&s, from: 20 * min - 25, to: 25 * min - 65).allSatisfy { $0 == .working })
     #expect(
         s.update(now: at(25 * min - 30), idleSeconds: 0)
-            == .onBreak(kind: .short, endsAt: at(25 * min - 10)))
+            == .onBreak(kind: .short, endsAt: at(25 * min - 5)))
 }
 
 @Test func postponeOutsideHeadsUpDoesNothing() {
@@ -207,7 +207,7 @@ private func breakKinds(_ s: inout BreakScheduler, until: TimeInterval) -> [Brea
     var s = scheduler(kinds: [.long])
     var seen: [BreakState] = []
     seen += run(&s, from: 0, to: 60 * min)
-    #expect(!seen.contains(.onBreak(kind: .short, endsAt: at(20 * min + 20))))
+    #expect(!seen.contains(.onBreak(kind: .short, endsAt: at(20 * min + 25))))
     #expect(s.state == .onBreak(kind: .long, endsAt: at(60 * min + 5 * min)))
 }
 
@@ -230,7 +230,7 @@ private func breakKinds(_ s: inout BreakScheduler, until: TimeInterval) -> [Brea
     s.startBreak(.long, now: at(10))
     #expect(s.state == .working)
     s.startBreak(.short, now: at(10))
-    #expect(s.state == .onBreak(kind: .short, endsAt: at(30)))
+    #expect(s.state == .onBreak(kind: .short, endsAt: at(35)))
 }
 
 @Test func startBreakCanOverrideTheDuration() {
@@ -289,5 +289,42 @@ private func breakKinds(_ s: inout BreakScheduler, until: TimeInterval) -> [Brea
     var changed = Settings()
     changed.shortBreakInterval = 10 * 60
     s.apply(settings: changed, availableKinds: both, now: at(20 * min + 5))
-    #expect(s.state == .onBreak(kind: .short, endsAt: at(20 * min + 20)))
+    #expect(s.state == .onBreak(kind: .short, endsAt: at(20 * min + 25)))
+}
+
+@Test func shortBreakStartsWithAReadingLeadIn() {
+    #expect(Settings().breakLeadIn(for: .short) == 5)
+}
+
+@Test func longBreakHasNoLeadIn() {
+    #expect(Settings().breakLeadIn(for: .long) == 0)
+    var s = scheduler()
+    run(&s, from: 0, to: 60 * min)
+    #expect(s.state == .onBreak(kind: .long, endsAt: at(60 * min + 5 * min)))
+}
+
+@Test func leadInAlsoAppliesWhenTheBreakFollowsAHeadsUp() {
+    var s = scheduler()
+    run(&s, from: 0, to: 20 * min - 30)
+    #expect(s.state == .headsUp(kind: .short, startsAt: at(20 * min)))
+    s.update(now: at(20 * min), idleSeconds: 0)
+    #expect(s.state == .onBreak(kind: .short, endsAt: at(20 * min + 5 + 20)))
+}
+
+@Test func timersRestartAtTheEndOfTheBreakIncludingTheLeadIn() {
+    var s = scheduler()
+    run(&s, from: 0, to: 20 * min + 24)
+    #expect(s.shortDue == at(20 * min))
+    s.update(now: at(20 * min + 25), idleSeconds: 0)
+    #expect(s.state == .working)
+    #expect(s.shortDue == at(20 * min + 25 + 20 * min))
+}
+
+@Test func startBreakAddsTheLeadInUnlessTheDurationIsGiven() {
+    var s = scheduler()
+    s.startBreak(.short, now: at(10))
+    #expect(s.state == .onBreak(kind: .short, endsAt: at(10 + 5 + 20)))
+    var t = scheduler()
+    t.startBreak(.short, now: at(10), duration: 4)
+    #expect(t.state == .onBreak(kind: .short, endsAt: at(14)))
 }

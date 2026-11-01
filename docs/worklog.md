@@ -9,6 +9,11 @@ Living status document. **Future agents: read `CLAUDE.md`, then this file, befor
 - Phases 0 to 4 are complete. Phase 4 (the owl) was reviewed and approved by the product owner.
 - The product owner works on a **laptop only** for now (no external monitor), and stopped for the day after slice 3. They will pick it up the next day with a new agent.
 
+## Session 2026-11-01 (not yet in the list above)
+
+- Committed to `main` directly (product owner's call, pre-release): idle reset changed to 5 min away only (reading or watching without input is not rest); the menu's "Next break at" now updates when settings change (`AppState.nextBreakDate` is observed).
+- Branch `break-lead-in` (uncommitted, awaiting hand check): 5 s reading lead-in for short breaks (`Settings.breakLeadIn`, scheduler `endsAt`, `BreakSession.leadIn`), instruction text 30 pt and 720 pt wide. Plan in `scratch/break-lead-in/plan.md`. 113 tests pass. To check by hand: `make demo`, expect the instruction with the countdown held at 0:20 for 5 s, then the 20 s countdown with the owl moving.
+
 ## Git workflow (from 2026-10-27: branches and PRs)
 
 The repo now has a GitHub remote, so `main` is no longer committed to directly.

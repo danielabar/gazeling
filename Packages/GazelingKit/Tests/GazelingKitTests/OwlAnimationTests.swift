@@ -83,3 +83,9 @@ private func pose(_ script: String, _ t: Double, duration: Double = 20) -> OwlPo
     #expect(a.blended(with: b, 0.5).gazeX == 0)
     #expect(a.blended(with: b, 0) == a && a.blended(with: b, 1) == b)
 }
+
+@Test func beforeAStepStartsThePoseHoldsTheOpeningPose() {
+    for id in OwlAnimation.scriptIDs {
+        #expect(pose(id, -3) == pose(id, 0), "\(id)")
+    }
+}
