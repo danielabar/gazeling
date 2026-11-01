@@ -7,12 +7,14 @@ Living status document. **Future agents: read `CLAUDE.md`, then this file, befor
 - **Phase 5 (settings and polish), slices 1 to 3 of 6 done and committed.** Latest commit: `6dd3e97`. Branch `main`, remote `origin` = github.com/danielabar/gazeling (SSH), in sync.
 - 100 unit tests, all passing (`make test`). The app builds (`make build`).
 - Phases 0 to 4 are complete. Phase 4 (the owl) was reviewed and approved by the product owner.
-- The product owner works on a **laptop only** for now (no external monitor), and stopped for the day after slice 3. They will pick it up the next day with a new agent.
+- The product owner has now tested with an external monitor (fine).
 
-## Session 2026-11-01 (not yet in the list above)
+## Session 2026-11-01
 
 - Committed to `main` directly (product owner's call, pre-release): idle reset changed to 5 min away only (reading or watching without input is not rest); the menu's "Next break at" now updates when settings change (`AppState.nextBreakDate` is observed).
-- Branch `break-lead-in` (uncommitted, awaiting hand check): 5 s reading lead-in for short breaks (`Settings.breakLeadIn`, scheduler `endsAt`, `BreakSession.leadIn`), instruction text 30 pt and 720 pt wide. Plan in `scratch/break-lead-in/plan.md`. 113 tests pass. To check by hand: `make demo`, expect the instruction with the countdown held at 0:20 for 5 s, then the 20 s countdown with the owl moving.
+- PR #1 merged (`e62904f`): 5 s reading lead-in for short breaks (`Settings.breakLeadIn`, scheduler `endsAt`, `BreakSession.leadIn`), instruction text 30 pt and 720 pt wide. 113 tests pass.
+- Product owner tested with an external monitor: fine. The "waiting for the external monitor" list is cleared.
+- Branch `ci-github-actions`: `.github/workflows/ci.yml` (runs `make test`, installs XcodeGen, `make build` on `macos-26`). Not yet pushed; check the first run on GitHub and adjust the runner image or Xcode version if it fails.
 
 ## Git workflow (from 2026-10-27: branches and PRs)
 
@@ -61,12 +63,6 @@ Phase 5 remaining slices. The product owner checks each one by hand (they are no
 - **Phase 7** (docs and release): About screen, `docs/user-guide.md`, GitHub Actions, release. Also decide the `Localizable.xcstrings` question (see Deviations).
 - **Phase 9** (branding) can happen any time: app icon, menu bar icon, README images. The user is not a designer: propose, let them choose.
 - **Phase 8** (optional): user-chosen break sounds. Scope in plan.md.
-
-### Waiting for the external monitor
-
-- The **owl-screen picker** on two screens (pointer / main / every screen). Only checked on one screen so far. A "specific display" option is deliberately not built until this can be tested.
-- Phase 3 leftovers: unplugging or plugging in a monitor mid-break, dimming on the second screen with the panel window.
-- The owl size on a larger display (`OwlSize` in `App/Overlay/BreakOverlayView.swift`, currently 30% of screen height clamped to 240 to 360 pt).
 
 ### Small known gaps
 
