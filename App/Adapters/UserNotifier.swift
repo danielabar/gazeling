@@ -1,3 +1,4 @@
+import AppKit
 import GazelingKit
 @preconcurrency import UserNotifications
 import os
@@ -22,6 +23,24 @@ final class UserNotifier: NSObject, Notifier, UNUserNotificationCenterDelegate {
         } catch {
             logger.error("notification permission error: \(error.localizedDescription, privacy: .public)")
         }
+    }
+
+    func authorizationStatus() async -> NotificationPermission {
+        switch await center.notificationSettings().authorizationStatus {
+        case .notDetermined: .notAsked
+        case .denied: .denied
+        default: .allowed
+        }
+    }
+
+    func openNotificationSettings() {
+        for address in [
+            "x-apple.systempreferences:com.apple.Notifications-Settings.extension",
+            "x-apple.systempreferences:com.apple.preference.notifications",
+        ] {
+            if let url = URL(string: address), NSWorkspace.shared.open(url) { return }
+        }
+        logger.error("could not open the Notifications settings")
     }
 
     func postHeadsUp(kind: BreakKind, seconds: TimeInterval) async {

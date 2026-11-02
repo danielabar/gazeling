@@ -70,3 +70,11 @@ Review images are in `docs/images/`: `owl-pose-sheet.png` (poses and palettes), 
 - **The last break stays on.** `AppState.canSwitchOff(_:)` and `canTurnOffLongBreaks` stop the settings window from switching off the last break that could happen. To stop breaks the user pauses.
 - **Where the owl shows.** `Settings.overlayScreen` (`pointer`, `main`, `all`) is passed to `OverlayPresenter.show(contentScreens:)`. Every screen always dims. "Main" is `NSScreen.screens.first` (the one with the menu bar), not `NSScreen.main`, which follows keyboard focus.
 - **Settings window.** `SettingsWindowController` is an AppKit `NSWindow` hosting SwiftUI (same pattern as the overlay), opened by the menu item "Settings…" (⌘,) and by `AppDelegate.applicationShouldHandleReopen`. A SwiftUI `Settings` scene was avoided: it is awkward to open from a delegate and can appear behind other windows in an app with no Dock icon.
+
+## First-run setup (Phase 5, slice 5)
+
+- The notification permission is requested by the first-run window, never at launch. `AppState.start()` does not ask.
+- "Setup done" is stored under its own `UserDefaults` key (`firstRunDone`), not in `Settings`, so "Restore default timings" cannot bring the window back.
+- Closing the window in any way (Done or the red button) counts as done. It never nags; everything is also in Settings.
+- Once macOS records notifications as denied it never prompts again, so the window offers "Open Notification settings" instead. The permission is read with `UNUserNotificationCenter.notificationSettings()` and refreshed when the app becomes active again.
+- Launch at login in the window uses the same `LaunchAtLoginModel` as the General tab, off by default.
