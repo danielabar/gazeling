@@ -39,8 +39,10 @@ struct BreaksSettingsView: View {
                 Text(DurationText.format(appState.settings[keyPath: keyPath]))
                     .monospacedDigit()
                     .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
                 Stepper(title, value: appState.binding(keyPath), in: range, step: step)
                     .labelsHidden()
+                    .accessibilityValue(DurationText.format(appState.settings[keyPath: keyPath]))
             }
         }
     }
