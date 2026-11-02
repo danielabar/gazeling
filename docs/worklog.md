@@ -2,12 +2,12 @@
 
 Living status document. **Future agents: read `CLAUDE.md`, then this file, before doing anything.** Update it at the end of every work session: where things stand, what is next, problems hit, deviations from `docs/planning/plan.md`.
 
-## Where we are (last updated 2026-10-26)
+## Where we are (last updated 2026-11-01)
 
-- **Phase 5 (settings and polish), slices 1 to 3 of 6 done and committed.** Latest commit: `6dd3e97`. Branch `main`, remote `origin` = github.com/danielabar/gazeling (SSH), in sync.
-- 100 unit tests, all passing (`make test`). The app builds (`make build`).
-- Phases 0 to 4 are complete. Phase 4 (the owl) was reviewed and approved by the product owner.
-- The product owner has now tested with an external monitor (fine).
+- **Phase 5 (settings and polish): slices 1 to 5 merged to `main`; slice 6 (keyboard, contrast, labels) is built on branch `phase5-slice6-accessibility`, awaiting the owner's check, commit and PR.** CI (GitHub Actions) exists and runs on every PR.
+- 133 unit tests, all passing (`make test`). The app builds (`make build`).
+- Phases 0 to 4 are complete. Next after Phase 5: Phase 6 (sound and voice), Phase 7 (docs and release, including deciding the release process), Phase 9 (branding).
+- The product owner has tested with an external monitor (fine).
 
 ## Session 2026-11-01
 
@@ -49,12 +49,11 @@ Phase 5 remaining slices. The product owner checks each one by hand (they are no
 - Original left-over: product owner checks the Slice 5 section of `scratch/manual-verification/phase5.md`, then commit, PR. The "not asked yet" prompt cannot be re-seen on the owner's Mac (macOS remembers); it is covered by unit tests only.
 - Launching with `make demo` or `make inspect` for the first time shows the window once.
 
-### Slice 6: accessibility and native look
+### Slice 6: keyboard, contrast, labels (built on branch `phase5-slice6-accessibility`; plan in `scratch/phase5-slice6-accessibility/plan.md`)
 
-- VoiceOver labels on the menu items, settings controls and the overlay (Skip button, countdown, the exercise title and instruction). The owl itself is decorative (`accessibilityHidden` already).
-- Keyboard-only pass: Tab through settings, ⌘, opens settings, Esc skips a break.
-- Contrast of the overlay text on the 75% black dim (the grey secondary text especially).
-- Then extend `scratch/manual-verification/phase5.md` with VoiceOver and keyboard steps, and tick Phase 5 below.
+- Scope (product owner): no VoiceOver work, keyboard access to Settings, contrast, labels. Rules in `docs/architecture.md`.
+- Built: countdown exposes its time, "Press Esc to skip" uses white at 75% instead of `.secondary`, Breaks-tab steppers expose their values. 133 tests pass.
+- Left: product owner does the three checks at the end of `scratch/manual-verification/phase5.md`, then commit, PR. This finishes Phase 5.
 
 ### Then
 
@@ -98,7 +97,7 @@ Phase 5 remaining slices. The product owner checks each one by hand (they are no
 - [x] Phase 2: domain core
 - [x] Phase 3: working breaks with placeholder character
 - [x] Phase 4: the owl (images in `docs/images/`)
-- [ ] Phase 5: settings and polish. Done: slice 1 (settings model), 2 (settings window: Breaks, Exercises), 3 (General tab: owl screen, sounds). Left: slices 4 to 6 above.
+- [x] Phase 5: settings and polish (slices 1 to 6; slice 6 awaiting hand check on its branch)
 - [ ] Phase 6: sound and voice
 - [ ] Phase 7: docs and release
 - [ ] Phase 8 (optional): user-chosen break sounds

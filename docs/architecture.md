@@ -78,3 +78,11 @@ Review images are in `docs/images/`: `owl-pose-sheet.png` (poses and palettes), 
 - Closing the window in any way (Done or the red button) counts as done. It never nags; everything is also in Settings.
 - Once macOS records notifications as denied it never prompts again, so the window offers "Open Notification settings" instead. The permission is read with `UNUserNotificationCenter.notificationSettings()` and refreshed when the app becomes active again.
 - Launch at login in the window uses the same `LaunchAtLoginModel` as the General tab, off by default.
+
+## Accessibility (Phase 5, slice 6)
+
+- Scope decision (2026-11-01): no VoiceOver work. The app is visual (dimmed screen, animated owl). Revisit audio guidance with the voice clips in Phase 6.
+- Settings, first-run window and menu use standard controls, so Tab order and focus come from macOS. Full keyboard access is a Mac setting (System Settings → Keyboard → Keyboard navigation).
+- Steppers expose their value (`accessibilityValue`) because the visible value is a separate `Text`, hidden from accessibility to avoid a duplicate.
+- Break screen text is white. Secondary text uses white at 75% opacity, not `.secondary`, so contrast does not depend on light or dark mode. Worst case (white screen behind the 75% black dim) is about 6.6:1; the minimum for normal text is 4.5:1.
+- Esc skips a break (app-wide key monitor). ⌘, opens Settings only while the eye menu is open.
