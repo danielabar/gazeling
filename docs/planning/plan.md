@@ -289,6 +289,7 @@ Each phase ends with a verifiable check.
 2. `docs/architecture.md`, `docs/user-guide.md`, `docs/development.md`.
 3. GitHub Actions workflow: build and test on a macOS runner.
 4. Release build, zip, GitHub Release with the Gatekeeper note.
+5. **Decide the release process** (added 2026-11-01): versioning scheme (semantic versioning, `MAJOR.MINOR.PATCH`, from `MARKETING_VERSION` in `project.yml`), git tags, how a GitHub Release is cut (manual or a tag-triggered Actions workflow), changelog, and whether `CURRENT_PROJECT_VERSION` follows the CI run number. Not yet discussed with the product owner.
 - *Verify:* a fresh clone builds and tests following only `docs/development.md`.
 
 **Phase 8 (optional, nice to have): choose your own sound**

@@ -42,12 +42,12 @@ Phase 5 remaining slices. The product owner checks each one by hand (they are no
 - Left: product owner checks Part 2 of the Slice 4 section in `scratch/manual-verification/phase5.md`, then commit, PR.
 - **Later cleanup reminder (suggest Phase 7, before release):** review all Debug menu items and `#if DEBUG` code, including `App/LaunchAtLoginSpike.swift` and its "Debug: launch at login spike" menu. Kept for now on purpose.
 
-### Slice 5: first-run setup
+### Slice 5: first-run setup (built on branch `phase5-slice5-first-run`, awaiting hand check; plan in `scratch/phase5-slice5-first-run/plan.md`)
 
-- `AppState.start()` currently asks for notification permission **on every launch**, so a brand-new user gets the macOS prompt with no explanation. Move that request behind a first-run window (an AppKit controller like `SettingsWindowController`) that explains why, asks for notification permission, and offers launch at login.
-- Record "setup done" under **its own UserDefaults key**, not in `Settings` (and not wiped by "restore defaults"). Test it.
-- Handle the **denied** case: once macOS records notifications as denied it never prompts again (found in Phase 1). Show a button to open System Settings → Notifications.
-- Add a debug menu item to reset first-run state, so the user can re-test it.
+- Built: `Notifier` gained `authorizationStatus()` and `openNotificationSettings()` (`NotificationPermission`), `FirstRunStore` (own key `firstRunDone`), `FirstRunModel` (tests in `FirstRunModelTests.swift`, 133 tests pass), `App/FirstRun/` window and view, debug item "show first-run setup again". `AppState.start()` no longer requests permission.
+- Product owner saw the window (looks right) and chose to skip the remaining manual steps (Done / red button persistence, denied case, launch-at-login switch in the window). Those are unverified by hand; the logic is covered by unit tests.
+- Original left-over: product owner checks the Slice 5 section of `scratch/manual-verification/phase5.md`, then commit, PR. The "not asked yet" prompt cannot be re-seen on the owner's Mac (macOS remembers); it is covered by unit tests only.
+- Launching with `make demo` or `make inspect` for the first time shows the window once.
 
 ### Slice 6: accessibility and native look
 
@@ -58,6 +58,7 @@ Phase 5 remaining slices. The product owner checks each one by hand (they are no
 
 ### Then
 
+- **Decide the release process** (versioning with semver, tags, GitHub Releases, changelog): listed under Phase 7 in `docs/planning/plan.md`. Not yet discussed.
 - **Phase 6** (sound and voice): our own chime and Kokoro voice clips. Today `SystemSoundPlayer` plays macOS's Tink (start) and Glass (end).
 - **Phase 7** (docs and release): About screen, `docs/user-guide.md`, GitHub Actions, release. Also decide the `Localizable.xcstrings` question (see Deviations).
 - **Phase 9** (branding) can happen any time: app icon, menu bar icon, README images. The user is not a designer: propose, let them choose.

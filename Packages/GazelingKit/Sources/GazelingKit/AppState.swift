@@ -54,10 +54,9 @@ public final class AppState {
         self.nextBreakDate = scheduler.nextBreak()?.due
     }
 
-    /// Asks for notification permission and starts polling once a second.
+    /// Starts polling once a second. Does not ask for notification permission: the first-run window does.
     public func start() {
         guard tickTask == nil else { return }
-        Task { await notifier.requestAuthorization() }
         tickTask = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(1))

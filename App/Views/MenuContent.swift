@@ -4,6 +4,7 @@ import SwiftUI
 struct MenuContent: View {
     let appState: AppState
     let settingsWindow: SettingsWindowController
+    let firstRunWindow: FirstRunWindowController
 
     var body: some View {
         Text(statusText)
@@ -38,6 +39,7 @@ struct MenuContent: View {
             Button("Debug: goodbye wave (4 s)") {
                 if let exercise = appState.exercises.first { appState.playNow(exercise: exercise, seconds: 4) }
             }
+            Button("Debug: show first-run setup again") { firstRunWindow.showAgain() }
             Menu("Debug: launch at login spike") {
                 Button("Log status") { LaunchAtLoginSpike.logStatus() }
                 Button("Register") { LaunchAtLoginSpike.register() }
