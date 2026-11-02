@@ -33,12 +33,14 @@ struct BreakOverlayView: View {
                 Text(Duration.seconds(Int(session.remaining.rounded(.up))), format: .time(pattern: .minuteSecond))
                     .font(.system(size: 28, weight: .medium).monospacedDigit())
                     .accessibilityLabel(Text("Time left"))
+                    .accessibilityValue(DurationText.format(session.remaining.rounded(.up)))
                 Button("Skip", action: onSkip)
                     .buttonStyle(.bordered)
                     .controlSize(.large)
                 Text("Press Esc to skip")
                     .font(.callout)
-                    .foregroundStyle(.secondary)
+                    // Explicit, not .secondary: stays readable on the dim in light and dark mode (about 6.6:1 at worst).
+                    .foregroundStyle(.white.opacity(0.75))
             }
             .foregroundStyle(.white)
             .padding(48)
