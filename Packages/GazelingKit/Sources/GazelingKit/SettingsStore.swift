@@ -37,3 +37,29 @@ public struct UserDefaultsSettingsStore: SettingsStore {
         defaults.set(try? JSONEncoder().encode(settings), forKey: key)
     }
 }
+
+/// Whether the first-run setup window has been dealt with. Kept apart from `Settings` so that
+/// restoring defaults never brings the window back.
+public protocol FirstRunStore {
+    var isDone: Bool { get set }
+}
+
+/// For tests and previews.
+public final class InMemoryFirstRunStore: FirstRunStore {
+    public var isDone = false
+    public init() {}
+}
+
+public struct UserDefaultsFirstRunStore: FirstRunStore {
+    private let defaults: UserDefaults
+    private let key = "firstRunDone"
+
+    public init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+    }
+
+    public var isDone: Bool {
+        get { defaults.bool(forKey: key) }
+        set { defaults.set(newValue, forKey: key) }
+    }
+}

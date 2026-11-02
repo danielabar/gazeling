@@ -12,6 +12,8 @@ private final class Fakes: IdleMonitor, Notifier, OverlayPresenter, SoundPlayer 
 
     func idleSeconds() -> TimeInterval { idle }
     func requestAuthorization() async { events.append("authorize") }
+    func authorizationStatus() async -> NotificationPermission { .allowed }
+    func openNotificationSettings() {}
     func postHeadsUp(kind: BreakKind, seconds: TimeInterval) async {
         events.append("headsUp:\(kind):\(Int(seconds))")
     }
@@ -315,4 +317,11 @@ private final class Harness {
     h.app.apply(settings: s)
     h.app.startBreakNow(.short)
     #expect(h.fakes.shownOn == .all)
+}
+
+@Test @MainActor func startingDoesNotAskForNotificationPermission() async {
+    let h = Harness()
+    h.app.start()
+    await Task.yield()
+    #expect(!h.fakes.events.contains("authorize"))
 }

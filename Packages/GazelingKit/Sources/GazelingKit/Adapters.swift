@@ -9,9 +9,20 @@ public protocol IdleMonitor {
     func idleSeconds() -> TimeInterval
 }
 
+/// What macOS has recorded about notifications for this app.
+public enum NotificationPermission: Equatable, Sendable {
+    /// macOS has not asked the user yet. Asking shows the system prompt (once).
+    case notAsked
+    case allowed
+    /// macOS never prompts again after a refusal. Only System Settings can change it.
+    case denied
+}
+
 @MainActor
 public protocol Notifier {
     func requestAuthorization() async
+    func authorizationStatus() async -> NotificationPermission
+    func openNotificationSettings()
     /// `seconds` is the time until the break starts.
     func postHeadsUp(kind: BreakKind, seconds: TimeInterval) async
     func removeHeadsUp()
