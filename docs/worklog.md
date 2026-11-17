@@ -60,10 +60,16 @@ Phase 5 remaining slices. The product owner checks each one by hand (they are no
 - Built: countdown exposes its time, "Press Esc to skip" uses white at 75% instead of `.secondary`, Breaks-tab steppers expose their values. 133 tests pass.
 - Left: product owner does the three checks at the end of `scratch/manual-verification/phase5.md`, then commit, PR. This finishes Phase 5.
 
+### Phase 6 status (branch `phase6-voice`; plan in `scratch/phase6-voice/plan.md`)
+
+- Built: voice clips (Kokoro, af_heart) for all 9 exercises, our own marimba chimes (replace Tink and Glass), `voiceEnabled` setting and General tab switch (greyed out while sounds are off), `BundledSoundPlayer` (AVAudioPlayer), `BundledAudio`, `scripts/generate-audio.sh`. 141 tests pass.
+- Left: product owner's hand check (`scratch/manual-verification/phase6.md`): timing of voice vs chime, volume, pronunciation. Then commit and PR.
+- Credit Kokoro in the About screen and README (Phase 7); confirm its licence then.
+
 ### Then
 
 - **Decide the release process** (versioning with semver, tags, GitHub Releases, changelog): listed under Phase 7 in `docs/planning/plan.md`. Not yet discussed.
-- **Phase 6** (sound and voice): our own chime and Kokoro voice clips. Today `SystemSoundPlayer` plays macOS's Tink (start) and Glass (end).
+- **Phase 6** (sound and voice): built on branch `phase6-voice`, awaiting hand check (see "Phase 6 status" below).
 - **Phase 7** (docs and release): About screen, `docs/user-guide.md`, GitHub Actions, release. Also decide the `Localizable.xcstrings` question (see Deviations).
 - **Phase 9** (branding) can happen any time: app icon, menu bar icon, README images. The user is not a designer: propose, let them choose.
 - **Phase 8** (optional): user-chosen break sounds. Scope in plan.md.

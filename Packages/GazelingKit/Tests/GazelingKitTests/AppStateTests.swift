@@ -28,6 +28,8 @@ private final class Fakes: IdleMonitor, Notifier, OverlayPresenter, SoundPlayer 
     func hide() { events.append("hide") }
     func playBreakStart() { events.append("startSound") }
     func playBreakEnd() { events.append("endSound") }
+    func playInstruction(of exercise: Exercise) { events.append("voice:\(exercise.id)") }
+    func stopInstruction() { events.append("stopVoice") }
 }
 
 @MainActor
@@ -62,7 +64,8 @@ private final class Harness {
     await h.advance(29)
     #expect(h.fakes.events == ["headsUp:short:30"])
     await h.advance(1)
-    #expect(h.fakes.events == ["headsUp:short:30", "removeHeadsUp", "show", "startSound"])
+    let id = h.app.session?.step.exercise.id ?? "none"
+    #expect(h.fakes.events == ["headsUp:short:30", "removeHeadsUp", "show", "startSound", "voice:\(id)"])
     #expect(h.app.session?.plan.kind == .short)
 }
 
@@ -73,7 +76,7 @@ private final class Harness {
     await h.advance(24)
     #expect(h.fakes.events.isEmpty)
     await h.advance(1)
-    #expect(h.fakes.events == ["hide", "endSound"])
+    #expect(h.fakes.events == ["hide", "stopVoice", "endSound"])
     #expect(h.app.state == .working && h.app.session == nil)
 }
 
@@ -108,7 +111,7 @@ private final class Harness {
     await h.advance(20 * 60)
     h.fakes.events = []
     h.fakes.onSkip?()
-    #expect(h.fakes.events == ["hide"])
+    #expect(h.fakes.events == ["hide", "stopVoice"])
     #expect(h.app.state == .working)
 }
 
@@ -143,7 +146,8 @@ private final class Harness {
 @Test @MainActor func startBreakNowShowsTheOverlay() async {
     let h = Harness()
     h.app.startBreakNow(.long)
-    #expect(h.fakes.events == ["show", "startSound"])
+    let id = h.app.session?.step.exercise.id ?? "none"
+    #expect(h.fakes.events == ["show", "startSound", "voice:\(id)"])
     #expect(h.app.session?.plan.kind == .long)
 }
 
@@ -182,7 +186,7 @@ private final class Harness {
     let h = Harness()
     let palming = try #require(h.app.exercises.first { $0.id == "palming" })
     h.app.playNow(exercise: palming)
-    #expect(h.fakes.events == ["show", "startSound"])
+    #expect(h.fakes.events == ["show", "startSound", "voice:palming"])
     #expect(h.app.session?.plan.steps.map(\.exercise.id) == ["palming"])
     #expect(h.app.session?.totalSeconds == 30)
     await h.advance(29)
@@ -324,4 +328,37 @@ private final class Harness {
     h.app.start()
     await Task.yield()
     #expect(!h.fakes.events.contains("authorize"))
+}
+
+@Test @MainActor func theVoiceReadsTheExerciseWhenSoundsAndVoiceAreOn() {
+    let h = Harness()
+    h.app.startBreakNow(.short)
+    let id = h.app.session?.step.exercise.id ?? "none"
+    #expect(h.fakes.events.contains("voice:\(id)"))
+}
+
+@Test @MainActor func noVoiceWhenVoiceIsOff() {
+    var settings = Settings()
+    settings.voiceEnabled = false
+    let h = Harness(settings: settings)
+    h.app.startBreakNow(.short)
+    #expect(h.fakes.events.contains("startSound"))
+    #expect(!h.fakes.events.contains { $0.hasPrefix("voice:") })
+}
+
+@Test @MainActor func noVoiceWhenSoundsAreOff() {
+    var settings = Settings()
+    settings.soundsEnabled = false
+    let h = Harness(settings: settings)
+    h.app.startBreakNow(.short)
+    #expect(!h.fakes.events.contains("startSound"))
+    #expect(!h.fakes.events.contains { $0.hasPrefix("voice:") })
+}
+
+@Test @MainActor func theVoiceStopsWhenTheBreakIsSkipped() {
+    let h = Harness()
+    h.app.startBreakNow(.short)
+    h.fakes.events = []
+    h.fakes.onSkip?()
+    #expect(h.fakes.events.contains("stopVoice"))
 }

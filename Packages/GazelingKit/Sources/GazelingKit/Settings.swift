@@ -16,6 +16,8 @@ public struct Settings: Codable, Sendable, Equatable {
     /// Which screen shows the owl and the exercise text. Every screen is dimmed either way.
     public var overlayScreen: OverlayScreen = .pointer
     public var soundsEnabled = true
+    /// Read the exercise instruction aloud. Only applies while `soundsEnabled` is on.
+    public var voiceEnabled = true
 
     public init() {}
 
@@ -117,6 +119,7 @@ public struct Settings: Codable, Sendable, Equatable {
             try c.decodeIfPresent(Set<String>.self, forKey: .disabledExerciseIDs) ?? d.disabledExerciseIDs
         overlayScreen = try c.decodeIfPresent(OverlayScreen.self, forKey: .overlayScreen) ?? d.overlayScreen
         soundsEnabled = try c.decodeIfPresent(Bool.self, forKey: .soundsEnabled) ?? d.soundsEnabled
+        voiceEnabled = try c.decodeIfPresent(Bool.self, forKey: .voiceEnabled) ?? d.voiceEnabled
     }
 }
 

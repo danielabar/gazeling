@@ -37,3 +37,16 @@ open "$APP" --args --short-interval 30 --heads-up 10 --short-duration 20
 ```
 
 Flags: `--no-auto-breaks` (no scheduled breaks at all, only the Debug menu), `--short-interval`, `--short-duration`, `--long-interval`, `--long-duration`, `--heads-up`, `--break-now`.
+
+## Audio (chimes and voice)
+
+The app plays two chimes and one spoken clip per exercise, all in `Packages/GazelingKit/Sources/GazelingKit/Resources/Audio/` (`break-start.m4a`, `break-end.m4a`, `<exercise-id>.en.m4a`). They are committed, so building the app needs nothing extra. A test checks that every exercise has a clip.
+
+To regenerate them (for example after changing an instruction):
+
+1. Edit the spoken text in `scripts/audio/voice-scripts.json`. The chime recipe is `scripts/audio/make_chimes.py`.
+2. Run `scripts/generate-audio.sh`.
+
+It needs a Python with `kokoro-onnx` and `numpy` plus the Kokoro model files (`kokoro-v1.0.onnx`, `voices-v1.0.bin`), and `afconvert` (part of macOS). Defaults: `KOKORO_PYTHON=~/.venvs/kokoro/bin/python`, `KOKORO_DIR=~/.local/share/kokoro`, `GAZELING_VOICE=af_heart`, `GAZELING_VOICE_SPEED=0.95`. Listen to every clip afterwards.
+
+Credit: the voice is Kokoro (an open text-to-speech model, Apache 2.0 licence according to its project page; confirm before release and credit it in the About screen and README). The chimes are synthesized by our own script, not recorded.

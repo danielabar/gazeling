@@ -195,11 +195,15 @@ public final class AppState {
         overlay.show(
             session: session, contentScreens: settings.overlayScreen,
             onSkip: { [weak self] in self?.skipCurrentBreak() })
-        if settings.soundsEnabled { sound.playBreakStart() }
+        if settings.soundsEnabled {
+            sound.playBreakStart()
+            if settings.voiceEnabled { sound.playInstruction(of: plan.steps[0].exercise) }
+        }
     }
 
     private func endSession(finished: Bool) {
         overlay.hide()
+        sound.stopInstruction()
         session = nil
         if finished && settings.soundsEnabled { sound.playBreakEnd() }
     }
