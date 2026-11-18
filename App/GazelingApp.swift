@@ -30,7 +30,7 @@ struct GazelingApp: App {
     }
 
     var body: some Scene {
-        MenuBarExtra("Gazeling", systemImage: "eye") {
+        MenuBarExtra("Gazeling", image: "MenuBarIcon") {
             MenuContent(appState: appState, settingsWindow: settingsWindow, firstRunWindow: firstRunWindow)
         }
     }

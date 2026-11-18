@@ -1,4 +1,4 @@
-.PHONY: help build test run demo inspect stop logs pose-sheet animation-strips
+.PHONY: help build test run demo inspect stop logs pose-sheet animation-strips icons
 
 help:
 	@echo "make test   run the unit tests"
@@ -10,6 +10,7 @@ help:
 	@echo "make logs   show the app log from the last 5 minutes"
 	@echo "make pose-sheet  render the owl pose sheet to scratch/owl/ and open it"
 	@echo "make animation-strips  render frames of every exercise animation and open them"
+	@echo "make icons  regenerate the app icon and menu bar icon in App/Assets.xcassets"
 
 build:
 	scripts/build.sh
@@ -39,3 +40,6 @@ pose-sheet:
 animation-strips:
 	swift run --package-path Packages/GazelingKit PoseSheet strips "$(CURDIR)/scratch/owl/animation-strips.png"
 	open scratch/owl/animation-strips.png
+
+icons:
+	scripts/generate-icons.sh

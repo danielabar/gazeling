@@ -21,6 +21,12 @@ Living status document. **Future agents: read `CLAUDE.md`, then this file, befor
 - Phase 6 voice work committed on `phase6-voice`, rebased onto `main` after PR #6 merged. Owner checked it by hand with `make inspect`: works.
 - Branch `overlay-click-through`: screens that dim without the owl now let clicks through (`ignoresMouseEvents`), found while watching YouTube on an external monitor. With "Every screen" every screen has the owl, so nothing is click-through. Known limit: after clicking the other screen, Esc goes to that app until the owl screen is clicked. Also added "The laptop screen" (`OverlayScreen.builtIn`) and renamed "The main screen" to "The screen with the menu bar". Owner checked it by hand with the laptop and an external monitor: works.
 
+## Session 2026-11-18: Phase 7 and 9 on branch `phase7-release`
+
+- Plan: `scratch/phase7-release/plan.md`. One branch for About screen, user guide, README, release process, app icon and branding (owner's choice). First version 0.1.0, tags `vX.Y.Z`, automatic release on tag push, `CHANGELOG.md`. No localization in 0.1.0.
+- Branding done: app icon (happy owl, night gradient) and menu bar icon (ringed eyes and tufts; the happy-eyes version looked odd in the real menu bar), drawn in code, `make icons`. Details in `docs/architecture.md` ("Branding"). Option sheets in `scratch/phase7-release/`.
+- Next: About screen, then user guide and README, then release workflow.
+
 ## Git workflow (from 2026-10-27: branches and PRs)
 
 The repo now has a GitHub remote, so `main` is no longer committed to directly.

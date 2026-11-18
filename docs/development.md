@@ -12,6 +12,7 @@ make demo    # scripts/demo.sh: build and launch with short timers (break within
 make inspect # build and launch with no automatic breaks; start them from the Debug menu items
 make stop    # quit the running app
 make logs    # app log from the last 5 minutes
+make icons   # scripts/generate-icons.sh: redraw the app and menu bar icons into App/Assets.xcassets
 ```
 
 ## Logs

@@ -61,6 +61,15 @@ Review images are in `docs/images/`: `owl-pose-sheet.png` (poses and palettes), 
 - **Design decisions.** Eye shine moves with the iris (not fixed to the eye as first planned). Reduce Motion is deliberately not supported. Wings cover the eyes by sweeping inward across the chest (the outward route made the wings fling wide).
 - **Debug.** Debug builds have a "Debug: play exercise" menu. `make inspect` starts with no automatic breaks.
 
+## Branding (Phase 9, 2026-11-18)
+
+- **App icon.** The happy owl (eyes closed, `OwlPose.happy`), head and chest only, on a dark night gradient. The white of the eye uses the face colour so the face is one cream shape. Drawn in code (`AppIconView` in `Packages/GazelingKit/Sources/PoseSheet/BrandIcons.swift`) on the standard macOS grid (824 px rounded square on a 1024 canvas, corner radius 185). macOS 26 shows it in its normal rounded shape, not inside a grey frame, so no Icon Composer file is needed.
+- **Menu bar icon.** Two ringed eyes with ear tufts (`MenuBarIconView`). The happy-eyes version (eyes, brows, beak) looked odd next to the system icons, so the owner chose this one. A template image (`template-rendering-intent` in the asset's `Contents.json`), so macOS tints it for light and dark menu bars.
+- **Regenerate** both with `make icons` (`scripts/generate-icons.sh`), which writes the PNGs into `App/Assets.xcassets`. Commit the PNGs.
+- **Pitfall:** `.shadow` on a group of shapes shadows each shape separately; the owl got a shadow ring around every eye. `.compositingGroup()` before `.shadow` fixes it.
+- **Rejected:** open-eyed owls with a double rim around the eyes (looked like a "crazy stare"), a full-body owl (too small at 16 px), and menu bar icons with a solid head or a head outline (they look like GitHub's Octocat).
+- **Tagline:** "Short eye breaks for people who live at their screens."
+
 ## Settings and app state (Phase 5)
 
 - **Two copies of the settings.** `AppState.settings` is what the user edits and what is saved. The scheduler and the exercise picker use `settings` with the debug `TimingOverrides` laid on top (`make demo`, `make inspect`), so debug timings are never saved to the user's real settings.
