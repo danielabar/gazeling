@@ -16,6 +16,11 @@ Living status document. **Future agents: read `CLAUDE.md`, then this file, befor
 - Product owner tested with an external monitor: fine. The "waiting for the external monitor" list is cleared.
 - Branch `ci-github-actions`: `.github/workflows/ci.yml` (runs `make test`, installs XcodeGen, `make build` on `macos-26`). Not yet pushed; check the first run on GitHub and adjust the runner image or Xcode version if it fails.
 
+## Session 2026-11-17
+
+- Phase 6 voice work committed on `phase6-voice` (`71fe195`); hand check still open.
+- Branch `overlay-click-through`: screens that dim without the owl now let clicks through (`ignoresMouseEvents`), found while watching YouTube on an external monitor. With "Every screen" every screen has the owl, so nothing is click-through. Known limit: after clicking the other screen, Esc goes to that app until the owl screen is clicked. Also added "The laptop screen" (`OverlayScreen.builtIn`) and renamed "The main screen" to "The screen with the menu bar". Owner checked it by hand with the laptop and an external monitor: works.
+
 ## Git workflow (from 2026-10-27: branches and PRs)
 
 The repo now has a GitHub remote, so `main` is no longer committed to directly.
