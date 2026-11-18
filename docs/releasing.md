@@ -4,6 +4,8 @@ Gazeling uses [Semantic Versioning](https://semver.org/) and git tags named `vX.
 
 ## Cut a release
 
+The easy way: in Claude Code, on a clean, up-to-date `main`, type `/release` (`.claude/skills/release/SKILL.md`). It proposes the version, drafts the changelog section, and asks you twice: to approve the version and notes, and to merge and tag. `/release --dry-run` stops after the draft. The manual steps below do the same thing.
+
 1. **Changelog.** In `CHANGELOG.md`, rename `## [Unreleased]` content into a new `## [X.Y.Z] - YYYY-MM-DD` section, leave an empty `## [Unreleased]` above it, and update the compare links at the bottom.
 2. **Version.** Set `MARKETING_VERSION` in `project.yml` to `X.Y.Z`.
 3. **Pull request.** Commit both changes on a branch, open a PR and merge it once CI is green.
