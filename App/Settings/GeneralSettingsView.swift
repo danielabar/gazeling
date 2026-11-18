@@ -41,6 +41,8 @@ struct GeneralSettingsView: View {
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 Toggle("Play a sound when a break starts and ends", isOn: appState.binding(\.soundsEnabled))
+                Toggle("Read the exercise out loud", isOn: appState.binding(\.voiceEnabled))
+                    .disabled(!appState.settings.soundsEnabled)
             }
         }
         .formStyle(.grouped)

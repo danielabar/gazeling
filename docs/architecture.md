@@ -86,3 +86,10 @@ Review images are in `docs/images/`: `owl-pose-sheet.png` (poses and palettes), 
 - Steppers expose their value (`accessibilityValue`) because the visible value is a separate `Text`, hidden from accessibility to avoid a duplicate.
 - Break screen text is white. Secondary text uses white at 75% opacity, not `.secondary`, so contrast does not depend on light or dark mode. Worst case (white screen behind the 75% black dim) is about 6.6:1; the minimum for normal text is 4.5:1.
 - Esc skips a break (app-wide key monitor). ⌘, opens Settings only while the eye menu is open.
+
+## Sound and voice (Phase 6)
+
+- Voice: af_heart (Kokoro), chosen by the product owner. Chimes: our own marimba-like pair (option A of four tried). MacOS's Tink and Glass are not used, because the product owner already uses them for other tools.
+- `SoundPlayer` has `playInstruction(of:)` and `stopInstruction()`. `AppState` plays the voice with the start chime when `soundsEnabled && voiceEnabled`, and always calls `stopInstruction()` when a break ends or is skipped.
+- The voice starts 800 ms after the chime so they do not overlap. Tune `voiceDelay` in `BundledSoundPlayer`.
+- Audio files live in the package so tests can check them. `BundledAudio` finds them and falls back to English for other languages.

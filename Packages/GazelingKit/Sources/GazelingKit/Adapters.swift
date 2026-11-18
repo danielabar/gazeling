@@ -40,6 +40,10 @@ public protocol OverlayPresenter {
 public protocol SoundPlayer {
     func playBreakStart()
     func playBreakEnd()
+    /// Reads the exercise instruction aloud, a moment after the start chime. Replaces any clip still playing.
+    func playInstruction(of exercise: Exercise)
+    /// Stops the voice at once. Safe to call when nothing is playing.
+    func stopInstruction()
 }
 
 /// Whether macOS will start the app at login. Never stored by the app: macOS owns it and the user

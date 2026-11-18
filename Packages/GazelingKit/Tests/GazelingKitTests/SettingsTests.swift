@@ -35,6 +35,7 @@ private func fullyCustomised() -> Settings {
     s.disabledExerciseIDs = ["walk"]
     s.overlayScreen = .all
     s.soundsEnabled = false
+    s.voiceEnabled = false
     return s
 }
 
@@ -63,6 +64,7 @@ private func fullyCustomised() -> Settings {
 @Test func newFieldsDefaultSensibly() {
     #expect(Settings().overlayScreen == .pointer)
     #expect(Settings().soundsEnabled)
+    #expect(Settings().voiceEnabled)
 }
 
 // MARK: Limits
@@ -169,6 +171,7 @@ private func exercise(_ id: String) -> Exercise {
     #expect(s.disabledExerciseIDs == ["walk"])
     #expect(s.overlayScreen == .all)
     #expect(!s.soundsEnabled)
+    #expect(!s.voiceEnabled)
 }
 
 @Test func hasDefaultTimingsIsTrueOnlyWhenTimingsAreDefault() {
