@@ -7,6 +7,7 @@ struct GazelingApp: App {
     @State private var appState: AppState
     private let settingsWindow: SettingsWindowController
     private let firstRunWindow: FirstRunWindowController
+    private let aboutWindow = AboutWindowController()
 
     init() {
         let debug = DebugOptions()
@@ -31,7 +32,9 @@ struct GazelingApp: App {
 
     var body: some Scene {
         MenuBarExtra("Gazeling", image: "MenuBarIcon") {
-            MenuContent(appState: appState, settingsWindow: settingsWindow, firstRunWindow: firstRunWindow)
+            MenuContent(
+                appState: appState, settingsWindow: settingsWindow, firstRunWindow: firstRunWindow,
+                aboutWindow: aboutWindow)
         }
     }
 }

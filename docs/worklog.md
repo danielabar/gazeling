@@ -25,7 +25,8 @@ Living status document. **Future agents: read `CLAUDE.md`, then this file, befor
 
 - Plan: `scratch/phase7-release/plan.md`. One branch for About screen, user guide, README, release process, app icon and branding (owner's choice). First version 0.1.0, tags `vX.Y.Z`, automatic release on tag push, `CHANGELOG.md`. No localization in 0.1.0.
 - Branding done: app icon (happy owl, night gradient) and menu bar icon (ringed eyes and tufts; the happy-eyes version looked odd in the real menu bar), drawn in code, `make icons`. Details in `docs/architecture.md` ("Branding"). Option sheets in `scratch/phase7-release/`.
-- Next: About screen, then user guide and README, then release workflow.
+- About window built (menu item "About Gazeling"), checked by the owner.
+- Next: user guide and README, then release workflow.
 
 ## Git workflow (from 2026-10-27: branches and PRs)
 

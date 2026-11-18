@@ -5,6 +5,7 @@ struct MenuContent: View {
     let appState: AppState
     let settingsWindow: SettingsWindowController
     let firstRunWindow: FirstRunWindowController
+    let aboutWindow: AboutWindowController
 
     var body: some View {
         Text(statusText)
@@ -49,6 +50,7 @@ struct MenuContent: View {
         #endif
 
         Divider()
+        Button("About Gazeling") { aboutWindow.show() }
         Button("Settings…") { settingsWindow.show() }
             .keyboardShortcut(",")
         Button("Quit Gazeling") { NSApplication.shared.terminate(nil) }

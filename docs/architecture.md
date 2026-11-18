@@ -70,6 +70,13 @@ Review images are in `docs/images/`: `owl-pose-sheet.png` (poses and palettes), 
 - **Rejected:** open-eyed owls with a double rim around the eyes (looked like a "crazy stare"), a full-body owl (too small at 16 px), and menu bar icons with a solid head or a head outline (they look like GitHub's Octocat).
 - **Tagline:** "Short eye breaks for people who live at their screens."
 
+## About window (Phase 7)
+
+- "About Gazeling" in the menu opens `AboutView` through `AboutWindowController` (AppKit window, like Settings). Shows the app icon, version as `CFBundleShortVersionString (CFBundleVersion)`, tagline, "Why take eye breaks", sources and credits.
+- Claims follow `docs/planning/research.md` ("What the app says about the research"): modest wording, benefits depend on the habit. The owner removed the evidence caveats paragraph and the "see an eye doctor" advice (an app should not say which kind of doctor fits which symptom); it ends with "Gazeling is not a medical device." (2026-11-18). Sources: Singh 2022 review, Wolffsohn 2025 and Arita 2025 blink trials (DOI links).
+- Credits: MIT licence and repo link; Kokoro-82M voice (Apache 2.0, checked on its Hugging Face page 2026-11-18) and kokoro-onnx (MIT). Neither asks for attribution; credited anyway.
+- Links are Markdown inside localized `Text` strings, so translators keep the link.
+
 ## Settings and app state (Phase 5)
 
 - **Two copies of the settings.** `AppState.settings` is what the user edits and what is saved. The scheduler and the exercise picker use `settings` with the debug `TimingOverrides` laid on top (`make demo`, `make inspect`), so debug timings are never saved to the user's real settings.
