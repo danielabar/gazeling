@@ -1,0 +1,71 @@
+name: Release
+
+# Pushing a tag like v0.1.0 builds the app and publishes a GitHub Release.
+# See docs/releasing.md.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag matches MARKETING_VERSION
+        run: |
+          version=$(sed -n 's/^ *MARKETING_VERSION: *"\(.*\)"/\1/p' project.yml)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match MARKETING_VERSION $version in project.yml" >&2
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Unit tests (GazelingKit package)
+        run: make test
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Build and package
+        run: scripts/release-build.sh
+        env:
+          CURRENT_PROJECT_VERSION: ${{ github.run_number }}
+
+      - name: Write release notes
+        run: |
+          # The version's section of CHANGELOG.md, without its heading.
+          awk -v v="$VERSION" '
+            /^## \[/ { if (found) exit; if (index($0, "## [" v "]") == 1) { found = 1; next } }
+            /^\[[^]]+\]: / { if (found) exit }
+            found { print }
+          ' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then
+            echo "No section for $VERSION in CHANGELOG.md" >&2
+            exit 1
+          fi
+          cat >> notes.md <<'NOTE'
+
+          ## Installing
+
+          Gazeling is not signed with a paid Apple Developer account, so macOS blocks the first launch.
+          After you move `Gazeling.app` to Applications and open it, go to
+          **System Settings → Privacy & Security**, scroll down and click **Open Anyway**.
+          (On macOS 15 and later, right-click → Open no longer works.)
+          See the [user guide](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/docs/user-guide.md#the-first-time-you-open-it).
+          NOTE
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            "build/release/Gazeling-$VERSION.zip" \
+            "build/release/Gazeling-$VERSION.zip.sha256" \
+            --title "Gazeling $VERSION" \
+            --notes-file notes.md \
+            --verify-tag
