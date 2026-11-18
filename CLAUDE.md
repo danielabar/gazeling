@@ -40,21 +40,12 @@ Planning, research, design notes and the worklog are kept out of git on purpose 
 
 ## Working with the product owner
 
-- They are the product manager, a web developer (Rails, HTML/CSS/JS) with no native Mac experience. Explain Apple-specific terms briefly. Do the coding and tooling yourself.
 - Drive everything from the terminal with `xcodebuild`, `swift` and the scripts in `scripts/`. Only ask them to use Xcode when unavoidable, and then give click-by-click instructions.
 - Ask before installing software (for example `brew install xcodegen`) or doing anything outside this folder.
 - Prefer maintainable, idiomatic code over clever code. Document as you go (engineering docs and end-user docs).
 - Keep claims about eye health modest. No "clinically proven".
 - They sometimes ask a question only ("just a question", "don't change anything"): then answer and change nothing. Commit only when asked.
 - You cannot see the screen or press keys. Give them copy-paste test steps with expected results (guides live in `scratch/manual-verification/`, which is gitignored).
-
-## Toolchain on this Mac (checked 2026-10-26)
-
-Xcode 27.1, Swift 6.4, macOS 26.7.1. XcodeGen 2.46.0 is installed (Homebrew).
-
-## Not yet verified
-
-Launch-at-login inside the App Sandbox (Phase 5 slice 4). Idle detection, sleep/wake events, notifications and the overlay were verified in the sandbox in Phase 1. Anything involving a second monitor has not been tested (the product owner has a laptop only for now).
 
 ## Check logs
 
