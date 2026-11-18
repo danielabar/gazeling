@@ -35,6 +35,9 @@ final class FirstRunWindowController: NSObject, NSWindowDelegate {
             self.window = window
         }
         window?.makeKeyAndOrderFront(nil)
+        // macOS may refuse to activate the app when another app is in front (for example System
+        // Settings after "Open Anyway"), which leaves the window hidden behind it.
+        window?.orderFrontRegardless()
         NSApp.activate()
     }
 

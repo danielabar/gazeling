@@ -4,6 +4,10 @@ All notable changes to Gazeling are listed here. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+### Fixed
+
+- The welcome window could open hidden behind other windows when Gazeling was opened from System Settings ("Open Anyway").
+
 ## [0.1.0] - 2026-11-18
 
 First public release.
