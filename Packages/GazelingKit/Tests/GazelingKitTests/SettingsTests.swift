@@ -179,3 +179,21 @@ private func exercise(_ id: String) -> Exercise {
     s.headsUpLead = 45
     #expect(!s.hasDefaultTimings)
 }
+
+// MARK: Where the owl shows
+
+@Test func owlScreenChoice() {
+    // Three screens: 0 is the main one, the pointer is on 2, the laptop screen is 1.
+    func pick(_ c: OverlayScreen) -> [Int] { c.screensShowingContent(count: 3, pointer: 2, builtIn: 1) }
+    #expect(pick(.all) == [0, 1, 2])
+    #expect(pick(.main) == [0])
+    #expect(pick(.pointer) == [2])
+    #expect(pick(.builtIn) == [1])
+}
+
+@Test func owlScreenFallsBackToMainScreen() {
+    // No laptop screen (lid closed or a Mac mini) and the pointer not found: use the main screen.
+    #expect(OverlayScreen.builtIn.screensShowingContent(count: 2, pointer: nil, builtIn: nil) == [0])
+    #expect(OverlayScreen.pointer.screensShowingContent(count: 2, pointer: nil, builtIn: nil) == [0])
+    #expect(OverlayScreen.all.screensShowingContent(count: 0, pointer: nil, builtIn: nil).isEmpty)
+}

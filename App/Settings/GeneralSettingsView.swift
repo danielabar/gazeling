@@ -28,12 +28,18 @@ struct GeneralSettingsView: View {
             Section("During a break") {
                 Picker("Show the owl on", selection: appState.binding(\.overlayScreen)) {
                     Text("The screen with my pointer").tag(OverlayScreen.pointer)
-                    Text("The main screen").tag(OverlayScreen.main)
+                    Text("The screen with the menu bar").tag(OverlayScreen.main)
+                    Text("The laptop screen").tag(OverlayScreen.builtIn)
                     Text("Every screen").tag(OverlayScreen.all)
                 }
-                Text("Every screen always dims during a break. This chooses where the owl and the exercise appear.")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
+                Text(
+                    """
+                    Every screen always dims during a break. This chooses where the owl and the exercise appear. \
+                    You can still click on a dimmed screen without the owl, for example to pause a video.
+                    """
+                )
+                .font(.callout)
+                .foregroundStyle(.secondary)
                 Toggle("Play a sound when a break starts and ends", isOn: appState.binding(\.soundsEnabled))
             }
         }

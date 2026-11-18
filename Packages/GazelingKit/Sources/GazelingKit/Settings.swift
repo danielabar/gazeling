@@ -124,8 +124,23 @@ public struct Settings: Codable, Sendable, Equatable {
 public enum OverlayScreen: String, Codable, Sendable, CaseIterable {
     /// The screen the mouse pointer is on.
     case pointer
+    /// The screen with the menu bar (the user picks it in System Settings → Displays).
     case main
+    /// The laptop's own screen. Falls back to the main screen when there is none (lid closed, Mac mini).
+    case builtIn
     case all
+
+    /// Which screens show the owl, as indexes into the screen list. Index 0 is the main screen.
+    /// `pointer` and `builtIn` are the indexes of those screens, if any.
+    public func screensShowingContent(count: Int, pointer: Int?, builtIn: Int?) -> [Int] {
+        guard count > 0 else { return [] }
+        switch self {
+        case .all: return Array(0..<count)
+        case .main: return [0]
+        case .pointer: return [pointer ?? 0]
+        case .builtIn: return [builtIn ?? 0]
+        }
+    }
 }
 
 extension TimeInterval {

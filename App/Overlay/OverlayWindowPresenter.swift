@@ -2,8 +2,9 @@ import AppKit
 import GazelingKit
 import SwiftUI
 
-/// A borderless window over every screen. Dims all screens and shows the break on the screen with
-/// the pointer. Rebuilds the windows if screens are plugged in or out mid-break.
+/// A borderless window over every screen. Dims all screens and shows the break on the chosen screens.
+/// Screens without the break let clicks through, so the user can still pause a video there.
+/// Rebuilds the windows if screens are plugged in or out mid-break.
 @MainActor
 final class OverlayWindowPresenter: OverlayPresenter {
     private var windows: [NSWindow] = []
@@ -72,6 +73,9 @@ final class OverlayWindowPresenter: OverlayPresenter {
                 host.sizingOptions = []
                 window.contentView = host
                 window.setFrame(screen.frame, display: true)
+            } else {
+                // Dimmed only: clicks reach the app underneath (for example to pause a video).
+                window.ignoresMouseEvents = true
             }
             window.orderFrontRegardless()
             windows.append(window)
@@ -83,20 +87,21 @@ final class OverlayWindowPresenter: OverlayPresenter {
     }
 
     /// Every screen is dimmed; these are the ones that also show the owl.
+    /// The first screen is the one with the menu bar. `NSScreen.main` is the one with keyboard focus.
     private func screensShowingContent(_ choice: OverlayScreen) -> [NSScreen] {
-        switch choice {
-        case .all:
-            return NSScreen.screens
-        case .main:
-            // The first screen is the one with the menu bar. `NSScreen.main` is the one with keyboard focus.
-            return Array(NSScreen.screens.prefix(1))
-        case .pointer:
-            return screenWithPointer().map { [$0] } ?? []
-        }
+        let screens = NSScreen.screens
+        let pointer = NSEvent.mouseLocation
+        let indexes = choice.screensShowingContent(
+            count: screens.count,
+            pointer: screens.firstIndex { $0.frame.contains(pointer) },
+            builtIn: screens.firstIndex(where: isBuiltIn))
+        return indexes.map { screens[$0] }
     }
 
-    private func screenWithPointer() -> NSScreen? {
-        let pointer = NSEvent.mouseLocation
-        return NSScreen.screens.first { $0.frame.contains(pointer) } ?? NSScreen.main
+    /// True for a laptop's own screen (and an iMac's), false for an external monitor.
+    private func isBuiltIn(_ screen: NSScreen) -> Bool {
+        guard let id = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID
+        else { return false }
+        return CGDisplayIsBuiltin(id) != 0
     }
 }
