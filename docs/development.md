@@ -12,6 +12,13 @@ make demo    # scripts/demo.sh: build and launch with short timers (break within
 make inspect # build and launch with no automatic breaks; start them from the Debug menu items
 make stop    # quit the running app
 make logs    # app log from the last 5 minutes
+make icons   # scripts/generate-icons.sh: redraw the app and menu bar icons into App/Assets.xcassets
+```
+
+The README and user guide image `assets/screenshots/break.png` is rendered from code, not captured. Regenerate it after changing the break screen (and update `PoseSheet/ScreenshotView.swift`, which copies the layout of `BreakOverlayView`):
+
+```sh
+swift run --package-path Packages/GazelingKit PoseSheet screenshot "$PWD/assets/screenshots/break.png"
 ```
 
 ## Logs

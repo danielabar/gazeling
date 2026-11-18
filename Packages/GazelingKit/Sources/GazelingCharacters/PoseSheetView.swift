@@ -19,18 +19,6 @@ public struct PoseSheetView: View {
                     }
                 }
             }
-            section("Palettes (neutral and happy)") {
-                HStack(spacing: 16) {
-                    ForEach(OwlPalette.all, id: \.name) { palette in
-                        cell(palette.name) {
-                            HStack(spacing: 4) {
-                                OwlView(pose: .neutral, palette: palette).frame(width: 125, height: 150)
-                                OwlView(pose: .happy, palette: palette).frame(width: 125, height: 150)
-                            }
-                        }
-                    }
-                }
-            }
             section("Real size on the break screen (about 150 pt tall)") {
                 HStack(spacing: 16) {
                     ForEach(poses.prefix(6), id: \.0) { _, pose in

@@ -4,7 +4,7 @@ import GazelingKit
 import os
 
 /// Heads-up notification. The delegate makes the banner show even while the app counts as frontmost,
-/// which a menu bar app often does (see docs/architecture.md).
+/// which a menu bar app often does. Without it, a banner posted right after a menu click shows nothing.
 @MainActor
 final class UserNotifier: NSObject, Notifier, UNUserNotificationCenterDelegate {
     private let center = UNUserNotificationCenter.current()

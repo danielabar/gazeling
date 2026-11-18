@@ -5,6 +5,7 @@ struct MenuContent: View {
     let appState: AppState
     let settingsWindow: SettingsWindowController
     let firstRunWindow: FirstRunWindowController
+    let aboutWindow: AboutWindowController
 
     var body: some View {
         Text(statusText)
@@ -40,15 +41,10 @@ struct MenuContent: View {
                 if let exercise = appState.exercises.first { appState.playNow(exercise: exercise, seconds: 4) }
             }
             Button("Debug: show first-run setup again") { firstRunWindow.showAgain() }
-            Menu("Debug: launch at login spike") {
-                Button("Log status") { LaunchAtLoginSpike.logStatus() }
-                Button("Register") { LaunchAtLoginSpike.register() }
-                Button("Unregister") { LaunchAtLoginSpike.unregister() }
-                Button("Open Login Items settings") { LaunchAtLoginSpike.openLoginItems() }
-            }
         #endif
 
         Divider()
+        Button("About Gazeling") { aboutWindow.show() }
         Button("Settings…") { settingsWindow.show() }
             .keyboardShortcut(",")
         Button("Quit Gazeling") { NSApplication.shared.terminate(nil) }
