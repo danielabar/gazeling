@@ -2,11 +2,11 @@
 
 Living status document. **Future agents: read `CLAUDE.md`, then this file, before doing anything.** Update it at the end of every work session: where things stand, what is next, problems hit, deviations from `docs/planning/plan.md`.
 
-## Where we are (last updated 2026-11-01)
+## Where we are (last updated 2026-11-17)
 
-- **Phase 5 (settings and polish): slices 1 to 5 merged to `main`; slice 6 (keyboard, contrast, labels) is built on branch `phase5-slice6-accessibility`, awaiting the owner's check, commit and PR.** CI (GitHub Actions) exists and runs on every PR.
-- 133 unit tests, all passing (`make test`). The app builds (`make build`).
-- Phases 0 to 4 are complete. Next after Phase 5: Phase 6 (sound and voice), Phase 7 (docs and release, including deciding the release process), Phase 9 (branding).
+- **Phase 5 (settings and polish) is merged to `main`, plus PR #6 (click-through on dimmed screens, "The laptop screen"). Phase 6 (voice) is done on branch `phase6-voice`, hand-checked, awaiting PR and merge.** CI (GitHub Actions) exists and runs on every PR.
+- 143 unit tests, all passing (`make test`). The app builds (`make build`).
+- Phases 0 to 6 are complete once `phase6-voice` merges. Next: Phase 7 (docs and release, including deciding the release process), Phase 9 (branding).
 - The product owner has tested with an external monitor (fine).
 
 ## Session 2026-11-01
@@ -18,7 +18,7 @@ Living status document. **Future agents: read `CLAUDE.md`, then this file, befor
 
 ## Session 2026-11-17
 
-- Phase 6 voice work committed on `phase6-voice` (`71fe195`); hand check still open.
+- Phase 6 voice work committed on `phase6-voice`, rebased onto `main` after PR #6 merged. Owner checked it by hand with `make inspect`: works.
 - Branch `overlay-click-through`: screens that dim without the owl now let clicks through (`ignoresMouseEvents`), found while watching YouTube on an external monitor. With "Every screen" every screen has the owl, so nothing is click-through. Known limit: after clicking the other screen, Esc goes to that app until the owl screen is clicked. Also added "The laptop screen" (`OverlayScreen.builtIn`) and renamed "The main screen" to "The screen with the menu bar". Owner checked it by hand with the laptop and an external monitor: works.
 
 ## Git workflow (from 2026-10-27: branches and PRs)
@@ -63,13 +63,13 @@ Phase 5 remaining slices. The product owner checks each one by hand (they are no
 ### Phase 6 status (branch `phase6-voice`; plan in `scratch/phase6-voice/plan.md`)
 
 - Built: voice clips (Kokoro, af_heart) for all 9 exercises, our own marimba chimes (replace Tink and Glass), `voiceEnabled` setting and General tab switch (greyed out while sounds are off), `BundledSoundPlayer` (AVAudioPlayer), `BundledAudio`, `scripts/generate-audio.sh`. 141 tests pass.
-- Left: product owner's hand check (`scratch/manual-verification/phase6.md`): timing of voice vs chime, volume, pronunciation. Then commit and PR.
+- Hand check done 2026-11-17 (owner, `make inspect`): voice, chimes and timing fine. Left: PR and merge.
 - Credit Kokoro in the About screen and README (Phase 7); confirm its licence then.
 
 ### Then
 
 - **Decide the release process** (versioning with semver, tags, GitHub Releases, changelog): listed under Phase 7 in `docs/planning/plan.md`. Not yet discussed.
-- **Phase 6** (sound and voice): built on branch `phase6-voice`, awaiting hand check (see "Phase 6 status" below).
+- **Phase 6** (sound and voice): done on branch `phase6-voice`, awaiting PR and merge.
 - **Phase 7** (docs and release): About screen, `docs/user-guide.md`, GitHub Actions, release. Also decide the `Localizable.xcstrings` question (see Deviations).
 - **Phase 9** (branding) can happen any time: app icon, menu bar icon, README images. The user is not a designer: propose, let them choose.
 - **Phase 8** (optional): user-chosen break sounds. Scope in plan.md.
@@ -109,7 +109,7 @@ Phase 5 remaining slices. The product owner checks each one by hand (they are no
 - [x] Phase 3: working breaks with placeholder character
 - [x] Phase 4: the owl (images in `docs/images/`)
 - [x] Phase 5: settings and polish (slices 1 to 6; slice 6 awaiting hand check on its branch)
-- [ ] Phase 6: sound and voice
+- [x] Phase 6: sound and voice
 - [ ] Phase 7: docs and release
 - [ ] Phase 8 (optional): user-chosen break sounds
 - [ ] Phase 9: branding
