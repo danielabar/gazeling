@@ -4,6 +4,8 @@ All notable changes to Gazeling are listed here. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-18
+
 ### Fixed
 
 - The welcome window could open hidden behind other windows when Gazeling was opened from System Settings ("Open Anyway").
@@ -26,5 +28,6 @@ First public release.
 - "About Gazeling" window.
 - App icon and menu bar icon.
 
-[Unreleased]: https://github.com/danielabar/gazeling/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/danielabar/gazeling/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/danielabar/gazeling/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/danielabar/gazeling/releases/tag/v0.1.0
