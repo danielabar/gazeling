@@ -1,111 +1,98 @@
 # Architecture
 
-Design intent lives in `docs/planning/plan.md`. This file records what was verified in practice. It grows as phases finish.
+Gazeling is a macOS menu bar app in Swift. The rules (when breaks happen, which exercise, settings) are plain Swift with no user interface code, so they can be unit tested. Everything that talks to macOS sits behind a protocol, with the real implementation in the app and a fake one in the tests.
 
-## Platform findings (Phase 1, 2026-10-26)
+## Modules
 
-Tested on macOS 26.7.1 with the App Sandbox enabled (`App/Gazeling.entitlements`) and ad-hoc signing. A laptop screen plus one external monitor.
+```mermaid
+flowchart TB
+    subgraph App["App target (App/)"]
+        UI["Menu bar menu<br/>Settings, About, first-run windows"]
+        Overlay["OverlayWindowPresenter<br/>BreakOverlayView"]
+        Adapters["Real adapters<br/>SystemIdleMonitor, UserNotifier,<br/>BundledSoundPlayer, SMAppServiceLaunchAtLogin"]
+    end
 
-| Area | API | Finding |
-|---|---|---|
-| Idle time | `CGEventSource.secondsSinceLastEventType(.combinedSessionState, ...)` | Works in the sandbox, no permission prompt. Pass `CGEventType(rawValue: ~0)` for "any input". |
-| Sleep/wake | `NSWorkspace.shared.notificationCenter`: `willSleep`, `didWake`, `screensDidSleep`, `screensDidWake`, session active/resign | Works in the sandbox. A real sleep delivered all four sleep/wake events. |
-| Overlay | One borderless `NSWindow` per `NSScreen`, level `.screenSaver`, `collectionBehavior` `[.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]` | Dims every screen, Esc dismisses (the window subclass overrides `canBecomeKey`), and it appears over a full-screen app (a full-screen YouTube video). |
-| Notifications | `UNUserNotificationCenter` | Works under ad-hoc signing once the user allows it in System Settings. |
-| Launch at login | `SMAppService.mainApp` (`register()`, `unregister()`, `status`) | Works in the sandbox with no extra entitlement, under ad-hoc signing, for the dev build in DerivedData (2026-11-01). `register()` succeeded and the status went straight to `.enabled`: **no approval was needed**, and Gazeling.app appeared under "Open at Login" in System Settings → General → Login Items & Extensions. `unregister()` removed it. **A never-registered build reports `.notFound`, not `.notRegistered`**, and after `unregister()` the status was `.notRegistered` at first, then `.notFound` about 30 s later. Treat both as "off". `.requiresApproval` was not seen, but the API documents it, so the UI still handles it. |
+    subgraph Kit["GazelingKit (Foundation only)"]
+        AppState["AppState<br/>polls once a second, drives the adapters"]
+        Scheduler["BreakScheduler<br/>state machine, no timers"]
+        Picker["ExercisePicker<br/>BreakPlan, BreakSession"]
+        Settings["Settings<br/>SettingsStore"]
+        Protocols["Protocols<br/>IdleMonitor, Notifier, OverlayPresenter,<br/>SoundPlayer, LaunchAtLogin"]
+        Data[("exercises.json<br/>voice clips, chimes")]
+    end
 
-Pitfalls found:
-- **Window position.** `NSWindow(contentRect:styleMask:backing:defer:screen:)` treats `contentRect` as relative to that screen. Create the window without `screen:` and call `setFrame(screen.frame, display: true)`.
-- **Banners hidden when frontmost.** Set a `UNUserNotificationCenterDelegate` whose `willPresent` returns `[.banner, .sound]`. Without it, a menu bar app posting right after a menu click shows nothing.
-- **Denied status is sticky.** Once macOS records notifications as denied, the app cannot re-prompt. The user must allow it in System Settings > Notifications.
-- **Logging.** `print` is invisible when launched from the menu. Use `os.Logger`; see `docs/development.md`.
+    subgraph Characters["GazelingCharacters (SwiftUI)"]
+        Owl["OwlView, OwlPose, OwlAnimation<br/>WindowSceneView"]
+    end
 
-Not yet tested: plugging a monitor in or out mid-break, Spaces switching during a break, launch-at-login (`SMAppService`) inside the sandbox.
+    PoseSheet["PoseSheet (command-line tool)<br/>renders review sheets, icons, README image"]
 
-## Code layout
+    UI --> AppState
+    Overlay --> Owl
+    Adapters -. implement .-> Protocols
+    AppState --> Scheduler
+    AppState --> Picker
+    AppState --> Settings
+    AppState --> Protocols
+    Picker --> Data
+    PoseSheet --> Owl
+```
 
-Spike code in `App/Spikes/Spikes.swift` is throwaway. Phase 3 replaces it with the adapters described in the plan.
+- **App target** (`App/`): SwiftUI for the menu, windows and break content; AppKit for the overlay windows, which must cover every screen and full-screen apps.
+- **GazelingKit** (`Packages/GazelingKit/Sources/GazelingKit`): the domain. `AppState` is the one object the user interface observes.
+- **GazelingCharacters**: the owl, drawn in code from separate parts, and its animations as pure functions of time.
+- **PoseSheet**: a developer tool that renders the owl to PNG files (`make pose-sheet`, `make icons`).
+- `project.yml` is the source of the Xcode project; XcodeGen generates `Gazeling.xcodeproj`.
 
-## Domain rules (Phase 2, `Packages/GazelingKit`)
+## Break states
 
-All of this is plain Swift with no UI imports. `scripts/test.sh` runs the tests (47 at the end of Phase 2).
+`BreakScheduler` holds the state. `AppState` calls `update(now:idleSeconds:)` once a second, compares the old and new state, and shows or hides the notification and overlay.
 
-**Exercises.** `exercises.json` lives in the package (`Sources/GazelingKit/Resources/`) so `swift test` checks the shipped file. It holds localization keys, a nominal duration, a `breakKind` (`short` or `long`) and an animation script id. Only `walk` is `long`; the other eight are `short`. (Originally most exercises could appear in both kinds and long breaks chained several; the product owner changed this on 2026-10-26 because minutes of eye movements could cause dizziness. The chain logic and the per-exercise tag overrides were deleted.)
+```mermaid
+stateDiagram-v2
+    [*] --> working
+    working --> headsUp: break due within the heads-up time
+    working --> onBreak: break due (heads-up off)
+    working --> working: away 5 min or more, timers restart
+    headsUp --> onBreak: break time reached
+    headsUp --> working: skip, postpone, or away 5 min
+    onBreak --> working: break ends or is skipped, timer restarts
+    working --> paused: pause
+    paused --> working: resume or pause time over
+```
 
-**Settings.** Defaults from `research.md`, plus postpone 5 min. Decoding uses `decodeIfPresent` per key, so a field added later never wipes saved settings. Exercises are excluded through `disabledExerciseIDs`; that is the only per-exercise setting.
+- A short break restarts the short timer. A long break restarts both timers, and replaces a short break due shortly before it.
+- If the Mac sleeps, the gap counts as time away. Waking up never starts a break.
 
-**Exercise choice.** `ExercisePicker.availableKinds`: a break kind is available only if it has at least one enabled exercise (long also needs `longBreaksEnabled`). Unavailable kinds never fire. Each break is one exercise, round-robin in catalog order within its kind (a pool of one repeats), stretched to the break's duration. The long break is therefore always the walk, for the full long-break duration.
+## A break from start to end
 
-**Scheduler** (`BreakScheduler`) has no timers. The app calls `update(now:idleSeconds:)` about once a second.
-- States: `working`, `headsUp(kind, startsAt)`, `onBreak(kind, endsAt)`, `paused(until)`.
-- Timers restart when a break **ends** (or is skipped). A short break restarts the short timer; a long break restarts both.
-- A long break replaces a short break that would fall within half a short interval before it (so a short break never ends just before a long one starts).
-- Idle in `working`: idle >= `awayThreshold` (5 min) restarts both timers. Shorter idle is ignored, because reading or watching a screen without input is not an eye rest (changed 2026-11-01; the old rule reset the short timer after 20 s idle, so breaks never came for someone reading).
-- A break lasts a lead-in plus its length: `endsAt = start + Settings.breakLeadIn(kind) + breakDuration(kind)`. The lead-in is 5 s for short breaks and 0 for long. `BreakSession` shows the instruction with the countdown frozen at the full length until the lead-in ends, then the exercise and countdown run. `startBreak(duration:)` (debug) has no lead-in.
-- Idle during a break is ignored. Idle for `awayThreshold` during the heads-up counts as the break taken.
-- Clock jump: if two updates are more than 60 s apart (Mac slept), the gap counts as idle. Waking never starts a break. The app must therefore poll often while awake.
-- Skip restarts the timer for that break's kind. Postpone (only from the heads-up) pushes that kind's due time by `postponeDuration`. Pause and resume restart both timers.
-- `apply(settings:availableKinds:now:)` restarts timers when settings change.
+```mermaid
+sequenceDiagram
+    participant S as BreakScheduler
+    participant A as AppState
+    participant N as Notifier
+    participant O as OverlayPresenter
+    participant P as SoundPlayer
 
-The scheduler returns state only. The app (Phase 3) diffs the state to trigger the notification, overlay and sound.
+    A->>S: update(now, idleSeconds), every second
+    S-->>A: headsUp
+    A->>N: postHeadsUp
+    A->>S: update(...)
+    S-->>A: onBreak
+    A->>N: removeHeadsUp
+    A->>A: pick exercise, make BreakSession
+    A->>O: show(session, screens)
+    A->>P: playBreakStart, playInstruction
+    Note over O: dims every screen, owl and countdown on the chosen screen
+    A->>S: update(...)
+    S-->>A: working (break over, or Skip / Esc)
+    A->>O: hide
+    A->>P: stopInstruction, playBreakEnd
+```
 
-## The owl (Phase 4, `Packages/GazelingKit/Sources/GazelingCharacters`)
+## Where data is stored
 
-Review images are in `docs/images/`: `owl-pose-sheet.png` (poses and palettes), `owl-animation-strips.png` (frames of every exercise animation) and `owl-window-scene.png`. Regenerate them with `make pose-sheet`, `make animation-strips` or `swift run --package-path Packages/GazelingKit PoseSheet sheet|strips|scene <out.png>`.
-
-- **Drawing.** `OwlView` draws the owl from separate parts in a fixed 200 x 240 space, scaled to fit. Back to front: feet, body, head (ear tufts, face, eyes, lids, brows, beak), wings. The look is the Dusk palette (indigo owl, amber eyes), chosen by the product owner. `OwlPalette` also has Honey and Mist, unused.
-- **Pose.** `OwlPose` is a struct of plain `Double`s (gaze x and y, eyelid, smile, brow, head tilt, each wing, wing cover, bounce, feet, breathe), so poses can be blended with `blended(with:_:)`.
-- **Animation.** `OwlAnimation.pose(script:at:duration:)` is a pure function of time, so it is unit tested and can be rendered to still frames. Each exercise names its script in `exercises.json` (`animationScript`); a test checks every exercise has one. Each step eases in from, and back out to, neutral over 0.5 s. Idle breathing, head sway and occasional blinks are added on top. In the last 2.2 s of every break the owl waves goodbye.
-- **Playback.** `AnimatedOwlView` uses `TimelineView(.animation)` and the step's start time from `BreakSession.stepStartedAt`. `BreakOverlayView` sizes the owl at 30% of the screen height, clamped to 240 to 360 pt (`OwlSize`).
-- **Scene.** `look-far` also shows `WindowSceneView` beside the owl (sky, drifting clouds, sun, hills, trees), chosen through `OwlAnimation.scene(for:)`. The first version, a front-facing owl staring into space, felt creepy to the product owner. The fallback if the window is disliked is a profile owl.
-- **Design decisions.** Eye shine moves with the iris (not fixed to the eye as first planned). Reduce Motion is deliberately not supported. Wings cover the eyes by sweeping inward across the chest (the outward route made the wings fling wide).
-- **Debug.** Debug builds have a "Debug: play exercise" menu. `make inspect` starts with no automatic breaks.
-
-## Branding (Phase 9, 2026-11-18)
-
-- **App icon.** The happy owl (eyes closed, `OwlPose.happy`), head and chest only, on a dark night gradient. The white of the eye uses the face colour so the face is one cream shape. Drawn in code (`AppIconView` in `Packages/GazelingKit/Sources/PoseSheet/BrandIcons.swift`) on the standard macOS grid (824 px rounded square on a 1024 canvas, corner radius 185). macOS 26 shows it in its normal rounded shape, not inside a grey frame, so no Icon Composer file is needed.
-- **Menu bar icon.** Two ringed eyes with ear tufts (`MenuBarIconView`). The happy-eyes version (eyes, brows, beak) looked odd next to the system icons, so the owner chose this one. A template image (`template-rendering-intent` in the asset's `Contents.json`), so macOS tints it for light and dark menu bars.
-- **Regenerate** both with `make icons` (`scripts/generate-icons.sh`), which writes the PNGs into `App/Assets.xcassets`. Commit the PNGs.
-- **Pitfall:** `.shadow` on a group of shapes shadows each shape separately; the owl got a shadow ring around every eye. `.compositingGroup()` before `.shadow` fixes it.
-- **Rejected:** open-eyed owls with a double rim around the eyes (looked like a "crazy stare"), a full-body owl (too small at 16 px), and menu bar icons with a solid head or a head outline (they look like GitHub's Octocat).
-- **Tagline:** "Short eye breaks for people who live at their screens."
-
-## About window (Phase 7)
-
-- "About Gazeling" in the menu opens `AboutView` through `AboutWindowController` (AppKit window, like Settings). Shows the app icon, version as `CFBundleShortVersionString (CFBundleVersion)`, tagline, "Why take eye breaks", sources and credits.
-- Claims follow `docs/planning/research.md` ("What the app says about the research"): modest wording, benefits depend on the habit. The owner removed the evidence caveats paragraph and the "see an eye doctor" advice (an app should not say which kind of doctor fits which symptom); it ends with "Gazeling is not a medical device." (2026-11-18). Sources: Singh 2022 review, Wolffsohn 2025 and Arita 2025 blink trials (DOI links).
-- Credits: MIT licence and repo link; Kokoro-82M voice (Apache 2.0, checked on its Hugging Face page 2026-11-18) and kokoro-onnx (MIT). Neither asks for attribution; credited anyway.
-- Links are Markdown inside localized `Text` strings, so translators keep the link.
-
-## Settings and app state (Phase 5)
-
-- **Two copies of the settings.** `AppState.settings` is what the user edits and what is saved. The scheduler and the exercise picker use `settings` with the debug `TimingOverrides` laid on top (`make demo`, `make inspect`), so debug timings are never saved to the user's real settings.
-- **Validation.** `Settings.validated()` clamps every value to the `Settings.*Range` limits (the settings window's steppers use the same ranges) and keeps long breaks longer and rarer than short ones and the heads-up shorter than the interval. `AppState.apply` validates before saving.
-- **When the countdown restarts.** `BreakScheduler.apply` restarts the timers only if a timing value changed (intervals, durations, heads-up lead), or for a break kind that has just become available. Switching an exercise off, changing sounds or the screen choice leaves the countdown alone. A heads-up in progress is cancelled only if timings changed or its kind became unavailable.
-- **Saving survives upgrades.** `Settings.init(from:)` uses `decodeIfPresent` per key. A test sets every field to a non-default value and checks it survives save and load; a second test fails if a new field is not added to that test, so a forgotten decode line cannot pass unnoticed.
-- **The last break stays on.** `AppState.canSwitchOff(_:)` and `canTurnOffLongBreaks` stop the settings window from switching off the last break that could happen. To stop breaks the user pauses.
-- **Where the owl shows.** `Settings.overlayScreen` (`pointer`, `main`, `builtIn`, `all`) is passed to `OverlayPresenter.show(contentScreens:)`. Every screen always dims. Screens without the owl set `ignoresMouseEvents`, so clicks reach the app underneath (pause a video on a second monitor). "Main" is `NSScreen.screens.first` (the one with the menu bar), not `NSScreen.main`, which follows keyboard focus. "Built-in" (shown as "The laptop screen") uses `CGDisplayIsBuiltin` and falls back to the main screen when there is none (lid closed, Mac mini). `OverlayScreen.screensShowingContent(count:pointer:builtIn:)` holds the choice so it is unit-tested.
-- **Settings window.** `SettingsWindowController` is an AppKit `NSWindow` hosting SwiftUI (same pattern as the overlay), opened by the menu item "Settings…" (⌘,) and by `AppDelegate.applicationShouldHandleReopen`. A SwiftUI `Settings` scene was avoided: it is awkward to open from a delegate and can appear behind other windows in an app with no Dock icon.
-
-## First-run setup (Phase 5, slice 5)
-
-- The notification permission is requested by the first-run window, never at launch. `AppState.start()` does not ask.
-- "Setup done" is stored under its own `UserDefaults` key (`firstRunDone`), not in `Settings`, so "Restore default timings" cannot bring the window back.
-- Closing the window in any way (Done or the red button) counts as done. It never nags; everything is also in Settings.
-- Once macOS records notifications as denied it never prompts again, so the window offers "Open Notification settings" instead. The permission is read with `UNUserNotificationCenter.notificationSettings()` and refreshed when the app becomes active again.
-- Launch at login in the window uses the same `LaunchAtLoginModel` as the General tab, off by default.
-
-## Accessibility (Phase 5, slice 6)
-
-- Scope decision (2026-11-01): no VoiceOver work. The app is visual (dimmed screen, animated owl). Revisit audio guidance with the voice clips in Phase 6.
-- Settings, first-run window and menu use standard controls, so Tab order and focus come from macOS. Full keyboard access is a Mac setting (System Settings → Keyboard → Keyboard navigation).
-- Steppers expose their value (`accessibilityValue`) because the visible value is a separate `Text`, hidden from accessibility to avoid a duplicate.
-- Break screen text is white. Secondary text uses white at 75% opacity, not `.secondary`, so contrast does not depend on light or dark mode. Worst case (white screen behind the 75% black dim) is about 6.6:1; the minimum for normal text is 4.5:1.
-- Esc skips a break (app-wide key monitor). ⌘, opens Settings only while the eye menu is open.
-
-## Sound and voice (Phase 6)
-
-- Voice: af_heart (Kokoro), chosen by the product owner. Chimes: our own marimba-like pair (option A of four tried). MacOS's Tink and Glass are not used, because the product owner already uses them for other tools.
-- `SoundPlayer` has `playInstruction(of:)` and `stopInstruction()`. `AppState` plays the voice with the start chime when `soundsEnabled && voiceEnabled`, and always calls `stopInstruction()` when a break ends or is skipped.
-- The voice starts 800 ms after the chime so they do not overlap. Tune `voiceDelay` in `BundledSoundPlayer`.
-- Audio files live in the package so tests can check them. `BundledAudio` finds them and falls back to English for other languages.
+- **Settings**: `UserDefaults`, as one JSON value (`UserDefaultsSettingsStore`). Unknown or missing keys fall back to defaults, so a new version never wipes saved settings.
+- **Exercises**: `exercises.json` in GazelingKit's resources, with localization keys. The text is in `App/Resources/Localizable.xcstrings`.
+- **Audio**: voice clips and chimes in GazelingKit's resources, generated by `scripts/generate-audio.sh`.
+- The app runs in the App Sandbox and has no network access.

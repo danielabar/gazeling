@@ -41,12 +41,6 @@ struct MenuContent: View {
                 if let exercise = appState.exercises.first { appState.playNow(exercise: exercise, seconds: 4) }
             }
             Button("Debug: show first-run setup again") { firstRunWindow.showAgain() }
-            Menu("Debug: launch at login spike") {
-                Button("Log status") { LaunchAtLoginSpike.logStatus() }
-                Button("Register") { LaunchAtLoginSpike.register() }
-                Button("Unregister") { LaunchAtLoginSpike.unregister() }
-                Button("Open Login Items settings") { LaunchAtLoginSpike.openLoginItems() }
-            }
         #endif
 
         Divider()

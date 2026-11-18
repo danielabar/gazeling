@@ -15,10 +15,10 @@ make logs    # app log from the last 5 minutes
 make icons   # scripts/generate-icons.sh: redraw the app and menu bar icons into App/Assets.xcassets
 ```
 
-The README and user guide image `docs/images/break-screenshot.png` is rendered from code, not captured. Regenerate it after changing the break screen (and update `PoseSheet/ScreenshotView.swift`, which copies the layout of `BreakOverlayView`):
+The README and user guide image `assets/screenshots/break.png` is rendered from code, not captured. Regenerate it after changing the break screen (and update `PoseSheet/ScreenshotView.swift`, which copies the layout of `BreakOverlayView`):
 
 ```sh
-swift run --package-path Packages/GazelingKit PoseSheet screenshot "$PWD/docs/images/break-screenshot.png"
+swift run --package-path Packages/GazelingKit PoseSheet screenshot "$PWD/assets/screenshots/break.png"
 ```
 
 ## Logs

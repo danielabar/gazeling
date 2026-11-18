@@ -1,8 +1,8 @@
 import AppKit
 import SwiftUI
 
-/// The About window: name, version, tagline, why eye breaks help (modest claims, per
-/// `docs/planning/research.md`), sources and credits. Links use Markdown, which `Text` renders.
+/// The About window: name, version, tagline, why eye breaks help (modest claims), sources and
+/// credits. Links use Markdown, which `Text` renders.
 struct AboutView: View {
     var body: some View {
         ScrollView {

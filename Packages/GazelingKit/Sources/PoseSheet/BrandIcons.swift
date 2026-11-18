@@ -3,7 +3,6 @@ import SwiftUI
 
 // The app icon and the menu bar icon, drawn from the owl code so they stay original art and can be
 // regenerated. `scripts/generate-icons.sh` renders them into `App/Assets.xcassets`.
-// The options considered are in `docs/architecture.md` ("Branding").
 
 /// The app icon: the happy owl (eyes closed) on a dark night gradient, head and chest only.
 /// Follows the macOS icon grid: on a canvas of `size`, a rounded square inset to 824/1024 with a

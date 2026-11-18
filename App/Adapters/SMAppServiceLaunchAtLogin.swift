@@ -1,7 +1,9 @@
 import GazelingKit
 import ServiceManagement
 
-/// Launch at login through `SMAppService`. See the "Launch at login" row in `docs/architecture.md`.
+/// Launch at login through `SMAppService`. Works in the App Sandbox with no extra entitlement and no
+/// approval. A never-registered app reports `.notFound`, and an unregistered one `.notRegistered` and
+/// later `.notFound`, so both mean off.
 @MainActor
 struct SMAppServiceLaunchAtLogin: LaunchAtLogin {
     var status: LaunchAtLoginStatus {

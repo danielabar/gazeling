@@ -8,7 +8,7 @@
 
 Gazeling is a free macOS menu bar app. Every 20 minutes it dims your screens for a short break, and an owl shows an eye exercise: blink fully, look far away, move your eyes, or rest them. Every hour it reminds you to stand up and walk. A voice reads each exercise out loud, so you can look away from the screen while you do it.
 
-![A break: the screen is dimmed and the owl shows the "Look far away" exercise](docs/images/break-screenshot.png)
+![A break: the screen is dimmed and the owl shows the "Look far away" exercise](assets/screenshots/break.png)
 
 ## Features
 
@@ -31,7 +31,7 @@ Download the zip from the [latest release](https://github.com/danielabar/gazelin
 - [User guide](docs/user-guide.md): install, breaks, the menu and every setting.
 - [Changelog](CHANGELOG.md): what changed in each version.
 - [Development](docs/development.md): build, test and run from source.
-- [Architecture](docs/architecture.md): how the app is built and why.
+- [Architecture](docs/architecture.md): diagrams of how the app fits together.
 - [Releasing](docs/releasing.md): how a new version is published.
 
 ## Build from source

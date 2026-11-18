@@ -2,7 +2,7 @@ import AppKit
 import GazelingCharacters
 import SwiftUI
 
-// Usage: PoseSheet sheet <out.png>   the owl's poses, palettes and sizes
+// Usage: PoseSheet sheet <out.png>   the owl's poses and sizes
 //        PoseSheet strips <out.png>  frames of every exercise animation
 //        PoseSheet scene <out.png>   the owl and window scene at break-screen size
 //        PoseSheet icons <AppIcon.appiconset> <MenuBarIcon.imageset>   the app and menu bar icons

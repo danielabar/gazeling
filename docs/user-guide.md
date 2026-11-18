@@ -2,7 +2,7 @@
 
 Gazeling lives in your menu bar and reminds you to rest your eyes. When a break starts, it dims your screens and an owl shows a short eye exercise. A voice reads the exercise out loud, so you can look away from the screen.
 
-![A break: the screen is dimmed and the owl shows the "Look far away" exercise](images/break-screenshot.png)
+![A break: the screen is dimmed and the owl shows the "Look far away" exercise](../assets/screenshots/break.png)
 
 ## Install
 
